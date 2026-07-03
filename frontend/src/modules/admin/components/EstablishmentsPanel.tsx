@@ -13,7 +13,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { useAdminEstablishments, useDeleteEstablishment } from '@/modules/admin/hooks/useAdmin'
+import {
+  useAdminEstablishments,
+  useDeleteEstablishment,
+  useUpdateEstablishment,
+} from '@/modules/admin/hooks/useAdmin'
 import { EstablishmentFormDialog } from '@/modules/admin/components/EstablishmentFormDialog'
 import type { AdminEstablishment } from '@/modules/admin/types'
 
@@ -21,6 +25,7 @@ export function EstablishmentsPanel() {
   const [search, setSearch] = useState('')
   const { data, isLoading } = useAdminEstablishments(search)
   const deleteEstablishment = useDeleteEstablishment()
+  const updateEstablishment = useUpdateEstablishment()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<AdminEstablishment | null>(null)
   const [deleting, setDeleting] = useState<AdminEstablishment | null>(null)
@@ -91,6 +96,19 @@ export function EstablishmentsPanel() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={updateEstablishment.isPending}
+                    onClick={() =>
+                      void updateEstablishment.mutateAsync({
+                        id: establishment.id,
+                        payload: { is_active: !establishment.is_active },
+                      })
+                    }
+                  >
+                    {establishment.is_active ? 'Desativar' : 'Ativar'}
+                  </Button>
                   <Button variant="ghost" size="sm" onClick={() => openEdit(establishment)}>
                     Editar
                   </Button>

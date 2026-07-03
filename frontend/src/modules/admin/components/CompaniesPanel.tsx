@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { useAdminCompanies, useDeleteCompany } from '@/modules/admin/hooks/useAdmin'
+import { useAdminCompanies, useDeleteCompany, useUpdateCompany } from '@/modules/admin/hooks/useAdmin'
 import { CompanyFormDialog } from '@/modules/admin/components/CompanyFormDialog'
 import type { AdminCompany } from '@/modules/admin/types'
 
@@ -21,6 +21,7 @@ export function CompaniesPanel() {
   const [search, setSearch] = useState('')
   const { data, isLoading } = useAdminCompanies(search)
   const deleteCompany = useDeleteCompany()
+  const updateCompany = useUpdateCompany()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<AdminCompany | null>(null)
   const [deleting, setDeleting] = useState<AdminCompany | null>(null)
@@ -87,6 +88,19 @@ export function CompaniesPanel() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={updateCompany.isPending}
+                    onClick={() =>
+                      void updateCompany.mutateAsync({
+                        id: company.id,
+                        payload: { is_active: !company.is_active },
+                      })
+                    }
+                  >
+                    {company.is_active ? 'Desativar' : 'Ativar'}
+                  </Button>
                   <Button variant="ghost" size="sm" onClick={() => openEdit(company)}>
                     Editar
                   </Button>

@@ -3,6 +3,8 @@
 namespace Tests\Feature\Auth;
 
 use App\Enums\UserRole;
+use App\Models\Company;
+use App\Models\Establishment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -52,7 +54,37 @@ class AuthTest extends TestCase
         $this->postJson('/api/auth/login', [
             'email' => 'blocked@sulus.test',
             'password' => 'password',
-        ])->assertUnprocessable();
+        ])->assertForbidden()->assertJsonPath('code', 'account_inactive');
+    }
+
+    public function test_deactivated_company_cannot_login(): void
+    {
+        $company = Company::factory()->create(['is_active' => false]);
+
+        $this->postJson('/api/auth/login', [
+            'email' => $company->user->email,
+            'password' => 'password',
+        ])->assertForbidden()->assertJsonPath('code', 'account_inactive');
+    }
+
+    public function test_deactivated_establishment_cannot_login(): void
+    {
+        $establishment = Establishment::factory()->create(['is_active' => false]);
+
+        $this->postJson('/api/auth/login', [
+            'email' => $establishment->user->email,
+            'password' => 'password',
+        ])->assertForbidden()->assertJsonPath('code', 'account_inactive');
+    }
+
+    public function test_active_company_can_login(): void
+    {
+        $company = Company::factory()->create(['is_active' => true]);
+
+        $this->postJson('/api/auth/login', [
+            'email' => $company->user->email,
+            'password' => 'password',
+        ])->assertOk();
     }
 
     public function test_authenticated_user_can_fetch_me(): void

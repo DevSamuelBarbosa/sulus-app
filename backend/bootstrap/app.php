@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Middleware\EnsureRole;
+use App\Modules\Auth\Exceptions\AccountInactiveException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -22,4 +24,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        // Expected business condition, not a bug — don't log it.
+        $exceptions->dontReport(AccountInactiveException::class);
+
+        $exceptions->render(fn (AccountInactiveException $e) => new JsonResponse([
+            'message' => $e->getMessage(),
+            'code' => 'account_inactive',
+        ], 403));
     })->create();

@@ -5,6 +5,7 @@ import { RoleRoute } from '@/modules/auth/components/RoleRoute'
 import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { DashboardLayout } from '@/app/layouts/DashboardLayout'
 import { LoginPage } from '@/modules/auth/pages/LoginPage'
+import { AccountInactivePage } from '@/modules/auth/pages/AccountInactivePage'
 import { AdminDashboard } from '@/modules/admin/pages/AdminDashboard'
 import { CompanyDashboard } from '@/modules/companies/pages/CompanyDashboard'
 import { EmployeeDashboard } from '@/modules/employees/pages/EmployeeDashboard'
@@ -23,6 +24,7 @@ export function AppRouter() {
     <Routes>
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/conta-desativada" element={<AccountInactivePage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>

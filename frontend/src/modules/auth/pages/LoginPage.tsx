@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { isAxiosError } from 'axios'
 import { useAuth } from '@/modules/auth/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import type { ApiError } from '@/shared/types'
 
 export function LoginPage() {
   const { login } = useAuth()
@@ -21,7 +23,11 @@ export function LoginPage() {
     try {
       await login({ email, password })
       navigate('/', { replace: true })
-    } catch {
+    } catch (err) {
+      if (isAxiosError<ApiError>(err) && err.response?.data.code === 'account_inactive') {
+        navigate('/conta-desativada')
+        return
+      }
       setError('Credenciais inválidas ou serviço indisponível.')
     } finally {
       setSubmitting(false)
