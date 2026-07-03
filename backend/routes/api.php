@@ -18,10 +18,11 @@ Route::get('/health', fn () => [
 ]);
 
 require __DIR__.'/api/localization.php';
+require __DIR__.'/api/categories.php';
+require __DIR__.'/api/auth.php';
+require __DIR__.'/api/admin.php';
 
-// Próximas fases (Fase 1+):
-// require __DIR__.'/api/auth.php';
-// require __DIR__.'/api/admin.php';
+// Próximas fases (Fase 2+):
 // require __DIR__.'/api/companies.php';
 // require __DIR__.'/api/employees.php';
 // require __DIR__.'/api/establishments.php';

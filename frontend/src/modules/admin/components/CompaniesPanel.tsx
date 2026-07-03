@@ -1,0 +1,129 @@
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { useAdminCompanies, useDeleteCompany } from '@/modules/admin/hooks/useAdmin'
+import { CompanyFormDialog } from '@/modules/admin/components/CompanyFormDialog'
+import type { AdminCompany } from '@/modules/admin/types'
+
+export function CompaniesPanel() {
+  const [search, setSearch] = useState('')
+  const { data, isLoading } = useAdminCompanies(search)
+  const deleteCompany = useDeleteCompany()
+  const [formOpen, setFormOpen] = useState(false)
+  const [editing, setEditing] = useState<AdminCompany | null>(null)
+  const [deleting, setDeleting] = useState<AdminCompany | null>(null)
+
+  function openCreate() {
+    setEditing(null)
+    setFormOpen(true)
+  }
+
+  function openEdit(company: AdminCompany) {
+    setEditing(company)
+    setFormOpen(true)
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Input
+          placeholder="Buscar por nome ou CNPJ…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-xs"
+        />
+        <Button onClick={openCreate}>Nova empresa</Button>
+      </div>
+
+      <div className="overflow-x-auto rounded-lg border border-border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Empresa</TableHead>
+              <TableHead>CNPJ</TableHead>
+              <TableHead>Cidade</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  Carregando…
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && data?.data.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  Nenhuma empresa encontrada.
+                </TableCell>
+              </TableRow>
+            )}
+            {data?.data.map((company) => (
+              <TableRow key={company.id}>
+                <TableCell>
+                  <div className="font-medium">{company.trade_name || company.legal_name}</div>
+                  <div className="text-xs text-muted-foreground">{company.login_email}</div>
+                </TableCell>
+                <TableCell>{company.cnpj}</TableCell>
+                <TableCell>{company.city ? `${company.city.name}/${company.city.uf}` : '—'}</TableCell>
+                <TableCell>
+                  <Badge variant={company.is_active ? 'secondary' : 'outline'}>
+                    {company.is_active ? 'Ativa' : 'Inativa'}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="ghost" size="sm" onClick={() => openEdit(company)}>
+                    Editar
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setDeleting(company)}>
+                    Excluir
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <CompanyFormDialog open={formOpen} onOpenChange={setFormOpen} company={editing} />
+
+      <AlertDialog open={deleting !== null} onOpenChange={(open) => !open && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir empresa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Isso remove {deleting?.trade_name || deleting?.legal_name} da listagem. A ação pode ser
+              revertida apenas via suporte.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleting) void deleteCompany.mutateAsync(deleting.id)
+                setDeleting(null)
+              }}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  )
+}
