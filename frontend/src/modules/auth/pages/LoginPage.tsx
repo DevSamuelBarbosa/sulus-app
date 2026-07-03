@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/modules/auth/AuthContext'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export function LoginPage() {
   const { login } = useAuth()
@@ -25,10 +29,10 @@ export function LoginPage() {
   }
 
   return (
-    <form className="login-form" onSubmit={handleSubmit}>
-      <div className="field">
-        <label htmlFor="email">E-mail</label>
-        <input
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="email">E-mail</Label>
+        <Input
           id="email"
           type="email"
           value={email}
@@ -36,9 +40,9 @@ export function LoginPage() {
           required
         />
       </div>
-      <div className="field">
-        <label htmlFor="password">Senha</label>
-        <input
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="password">Senha</Label>
+        <Input
           id="password"
           type="password"
           value={password}
@@ -46,10 +50,14 @@ export function LoginPage() {
           required
         />
       </div>
-      {error && <p className="error">{error}</p>}
-      <button type="submit" disabled={submitting}>
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <Button type="submit" disabled={submitting} className="w-full">
         {submitting ? 'Entrando…' : 'Entrar'}
-      </button>
+      </Button>
     </form>
   )
 }

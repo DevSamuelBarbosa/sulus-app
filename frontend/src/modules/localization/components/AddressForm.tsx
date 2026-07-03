@@ -2,6 +2,15 @@ import { useState } from 'react'
 import { localizationApi } from '@/modules/localization/api/localization.api'
 import { useCities, useStates } from '@/modules/localization/hooks/useLocalization'
 import type { AddressValue } from '@/modules/localization/types'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface AddressFormProps {
   value: AddressValue
@@ -54,37 +63,41 @@ export function AddressForm({ value, onChange }: AddressFormProps) {
   }
 
   return (
-    <div className="address-form">
-      <div className="field">
-        <label htmlFor="cep">CEP</label>
-        <input
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="cep">CEP</Label>
+        <Input
           id="cep"
           value={value.cep}
           onChange={(e) => patch({ cep: e.target.value })}
           onBlur={handleCepBlur}
           placeholder="00000-000"
         />
-        {cepStatus === 'loading' && <small>Buscando endereço…</small>}
-        {cepStatus === 'error' && <small className="error">CEP não encontrado — preencha manualmente.</small>}
+        {cepStatus === 'loading' && (
+          <p className="text-xs text-muted-foreground">Buscando endereço…</p>
+        )}
+        {cepStatus === 'error' && (
+          <p className="text-xs text-destructive">CEP não encontrado — preencha manualmente.</p>
+        )}
       </div>
 
-      <div className="field">
-        <label htmlFor="logradouro">Logradouro</label>
-        <input
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="logradouro">Logradouro</Label>
+        <Input
           id="logradouro"
           value={value.logradouro}
           onChange={(e) => patch({ logradouro: e.target.value })}
         />
       </div>
 
-      <div className="field-row">
-        <div className="field">
-          <label htmlFor="numero">Número</label>
-          <input id="numero" value={value.numero} onChange={(e) => patch({ numero: e.target.value })} />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="numero">Número</Label>
+          <Input id="numero" value={value.numero} onChange={(e) => patch({ numero: e.target.value })} />
         </div>
-        <div className="field">
-          <label htmlFor="complemento">Complemento</label>
-          <input
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="complemento">Complemento</Label>
+          <Input
             id="complemento"
             value={value.complemento}
             onChange={(e) => patch({ complemento: e.target.value })}
@@ -92,51 +105,55 @@ export function AddressForm({ value, onChange }: AddressFormProps) {
         </div>
       </div>
 
-      <div className="field">
-        <label htmlFor="bairro">Bairro</label>
-        <input id="bairro" value={value.bairro} onChange={(e) => patch({ bairro: e.target.value })} />
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="bairro">Bairro</Label>
+        <Input id="bairro" value={value.bairro} onChange={(e) => patch({ bairro: e.target.value })} />
       </div>
 
-      <div className="field-row">
-        <div className="field">
-          <label htmlFor="state">Estado</label>
-          <select
-            id="state"
-            value={value.state_id ?? ''}
-            onChange={(e) =>
-              patch({ state_id: e.target.value ? Number(e.target.value) : null, city_id: null })
-            }
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="state">Estado</Label>
+          <Select
+            value={value.state_id ? String(value.state_id) : ''}
+            onValueChange={(v) => patch({ state_id: v ? Number(v) : null, city_id: null })}
           >
-            <option value="">Selecione…</option>
-            {states.map((state) => (
-              <option key={state.id} value={state.id}>
-                {state.name} ({state.uf})
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="state" className="w-full">
+              <SelectValue placeholder="Selecione…" />
+            </SelectTrigger>
+            <SelectContent>
+              {states.map((state) => (
+                <SelectItem key={state.id} value={String(state.id)}>
+                  {state.name} ({state.uf})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="field">
-          <label htmlFor="city">Cidade</label>
-          <input
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="city">Cidade</Label>
+          <Input
             placeholder="Filtrar cidade…"
             value={citySearch}
             disabled={value.state_id === null}
             onChange={(e) => setCitySearch(e.target.value)}
           />
-          <select
-            id="city"
-            value={value.city_id ?? ''}
+          <Select
+            value={value.city_id ? String(value.city_id) : ''}
             disabled={value.state_id === null}
-            onChange={(e) => patch({ city_id: e.target.value ? Number(e.target.value) : null })}
+            onValueChange={(v) => patch({ city_id: v ? Number(v) : null })}
           >
-            <option value="">Selecione…</option>
-            {cities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="city" className="w-full">
+              <SelectValue placeholder="Selecione…" />
+            </SelectTrigger>
+            <SelectContent>
+              {cities.map((city) => (
+                <SelectItem key={city.id} value={String(city.id)}>
+                  {city.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>
