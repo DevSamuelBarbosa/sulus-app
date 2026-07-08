@@ -10,6 +10,8 @@ import { AdminDashboard } from '@/modules/admin/pages/AdminDashboard'
 import { CompanyDashboard } from '@/modules/companies/pages/CompanyDashboard'
 import { EmployeeDashboard } from '@/modules/employees/pages/EmployeeDashboard'
 import { EstablishmentDashboard } from '@/modules/establishments/pages/EstablishmentDashboard'
+import { EmployeeQrScreen } from '@/modules/qrcode/pages/EmployeeQrScreen'
+import { ScanQrPage } from '@/modules/benefits/pages/ScanQrPage'
 
 function HomeRedirect() {
   const { user } = useAuth()
@@ -42,7 +44,19 @@ export function AppRouter() {
           </Route>
           <Route element={<RoleRoute allow={['establishment']} />}>
             <Route path="/establishment" element={<EstablishmentDashboard />} />
+            <Route path="/establishment/scan" element={<ScanQrPage />} />
           </Route>
+        </Route>
+      </Route>
+
+      {/*
+        Deliberately outside DashboardLayout: the employee mostly opens this
+        on a phone at a partner's counter, so it gets its own full-bleed
+        chrome instead of the sidebar-less top bar used elsewhere.
+      */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<RoleRoute allow={['employee']} />}>
+          <Route path="/employee/qrcode" element={<EmployeeQrScreen />} />
         </Route>
       </Route>
 

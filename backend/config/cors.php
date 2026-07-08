@@ -9,7 +9,8 @@ return [
     |
     | The PWA frontend runs on a separate origin and authenticates with Bearer
     | tokens (no cookies), so credentials are disabled. Allowed origins are
-    | driven by FRONTEND_URL; add production domains via env as needed.
+    | driven by FRONTEND_URL (comma-separated — e.g. localhost plus a LAN IP
+    | for testing on a phone); add production domains via env as needed.
     |
     */
 
@@ -17,9 +18,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => array_filter([
-        env('FRONTEND_URL', 'http://localhost:5173'),
-    ]),
+    'allowed_origins' => array_filter(array_map(
+        'trim',
+        explode(',', env('FRONTEND_URL', 'http://localhost:5173')),
+    )),
 
     'allowed_origins_patterns' => [],
 
