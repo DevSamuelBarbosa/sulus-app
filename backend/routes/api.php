@@ -21,10 +21,9 @@ require __DIR__.'/api/localization.php';
 require __DIR__.'/api/categories.php';
 require __DIR__.'/api/auth.php';
 require __DIR__.'/api/admin.php';
+require __DIR__.'/api/company.php';
 
-// Próximas fases (Fase 2+):
-// require __DIR__.'/api/companies.php';
-// require __DIR__.'/api/employees.php';
+// Próximas fases (Fase 3+):
 // require __DIR__.'/api/establishments.php';
 // require __DIR__.'/api/benefits.php';
 // require __DIR__.'/api/qrcode.php';
