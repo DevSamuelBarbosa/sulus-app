@@ -16,3 +16,13 @@ export function useCities(stateId: number | null, search: string) {
     enabled: stateId !== null,
   })
 }
+
+/** Resolves a single city by id, regardless of the current search/page. */
+export function useCity(cityId: number | null) {
+  return useQuery({
+    queryKey: ['city', cityId],
+    queryFn: () => localizationApi.getCity(cityId!),
+    enabled: cityId !== null,
+    staleTime: Infinity, // canonical reference data
+  })
+}

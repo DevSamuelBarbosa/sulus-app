@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { localizationApi } from '@/modules/localization/api/localization.api'
-import { useCities, useStates } from '@/modules/localization/hooks/useLocalization'
+import { useCities, useCity, useStates } from '@/modules/localization/hooks/useLocalization'
 import type { AddressValue } from '@/modules/localization/types'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,10 +17,25 @@ interface AddressFormProps {
   onChange: (value: AddressValue) => void
 }
 
+/** Digits-only CEP formatted as "00000-000" for display. */
+function formatCep(cep: string): string {
+  const digits = cep.replace(/\D/g, '').slice(0, 8)
+  return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits
+}
+
 /**
  * Canonical address input: CEP autofills via ViaCEP and resolves the city to
  * the IBGE-backed `city_id`. State/city are always selected (never free text),
  * so duplicates like "marau"/"Marau" cannot occur.
+ *
+ * `value.cep` is always kept as digits-only in state (the API validates it as
+ * `digits:8`); the "00000-000" mask is applied only for display.
+ *
+ * CEP lookup only resolves `state_id`/`city_id` (the canonical geo match this
+ * feature exists for). It never touches logradouro/bairro/numero/complemento:
+ * ViaCEP granularity varies — generic city-wide CEPs return blank
+ * logradouro/bairro — and overwriting user-typed values with those blanks
+ * would clobber data the user is expected to fill in manually.
  */
 export function AddressForm({ value, onChange }: AddressFormProps) {
   const { data: states = [] } = useStates()
@@ -28,11 +43,22 @@ export function AddressForm({ value, onChange }: AddressFormProps) {
   const [cepStatus, setCepStatus] = useState<'idle' | 'loading' | 'error'>('idle')
 
   const { data: cities = [] } = useCities(value.state_id, citySearch)
+  // The saved/resolved city may fall outside the current search page, so it
+  // is fetched directly by id and merged into the options below — otherwise
+  // the dropdown would show blank for an already-selected city on load.
+  const { data: selectedCity } = useCity(value.city_id)
+
+  const cityOptions = useMemo(() => {
+    if (selectedCity && !cities.some((c) => c.id === selectedCity.id)) {
+      return [selectedCity, ...cities]
+    }
+    return cities
+  }, [cities, selectedCity])
 
   const patch = (partial: Partial<AddressValue>) => onChange({ ...value, ...partial })
 
   async function handleCepBlur() {
-    if (value.cep.replace(/\D/g, '').length !== 8) {
+    if (value.cep.length !== 8) {
       return
     }
 
@@ -51,12 +77,15 @@ export function AddressForm({ value, onChange }: AddressFormProps) {
       cityId = matches.find((c) => c.ibge_code === result.ibge)?.id ?? null
     }
 
+    // Keep the city filter in sync so the resolved city shows up as an
+    // option in the dropdown (it queries by this term), instead of relying
+    // on the default unfiltered/alphabetical page that may not include it.
+    setCitySearch(result.localidade)
+
     setCepStatus('idle')
     onChange({
       ...value,
-      cep: result.cep,
-      logradouro: result.logradouro,
-      bairro: result.bairro,
+      cep: result.cep.replace(/\D/g, ''),
       state_id: state?.id ?? null,
       city_id: cityId,
     })
@@ -68,8 +97,8 @@ export function AddressForm({ value, onChange }: AddressFormProps) {
         <Label htmlFor="cep">CEP</Label>
         <Input
           id="cep"
-          value={value.cep}
-          onChange={(e) => patch({ cep: e.target.value })}
+          value={formatCep(value.cep)}
+          onChange={(e) => patch({ cep: e.target.value.replace(/\D/g, '').slice(0, 8) })}
           onBlur={handleCepBlur}
           placeholder="00000-000"
         />
@@ -147,7 +176,7 @@ export function AddressForm({ value, onChange }: AddressFormProps) {
               <SelectValue placeholder="Selecione…" />
             </SelectTrigger>
             <SelectContent>
-              {cities.map((city) => (
+              {cityOptions.map((city) => (
                 <SelectItem key={city.id} value={String(city.id)}>
                   {city.name}
                 </SelectItem>

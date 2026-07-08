@@ -22,6 +22,15 @@ export const localizationApi = {
     return data.data
   },
 
+  /**
+   * Fetch a single city by id — used to resolve/display an already-selected
+   * city even when it falls outside the default search/pagination window.
+   */
+  async getCity(id: number): Promise<City> {
+    const { data } = await httpClient.get<{ data: City }>(`/cities/${id}`)
+    return data.data
+  },
+
   /** ViaCEP lives on its own origin, so it bypasses the API httpClient. */
   async lookupCep(cep: string): Promise<ViaCepResult | null> {
     const digits = cep.replace(/\D/g, '')

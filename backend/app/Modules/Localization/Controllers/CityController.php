@@ -31,4 +31,15 @@ class CityController extends Controller
 
         return CityResource::collection($cities);
     }
+
+    /**
+     * Fetch a single city by id, with its state loaded.
+     *
+     * Used to resolve/display an already-selected city_id in address forms
+     * even when it falls outside the default alphabetical/search page.
+     */
+    public function show(City $city): CityResource
+    {
+        return new CityResource($city->load('state:id,uf'));
+    }
 }
