@@ -12,6 +12,9 @@ import { EmployeeDashboard } from '@/modules/employees/pages/EmployeeDashboard'
 import { EstablishmentDashboard } from '@/modules/establishments/pages/EstablishmentDashboard'
 import { EmployeeQrScreen } from '@/modules/qrcode/pages/EmployeeQrScreen'
 import { ScanQrPage } from '@/modules/benefits/pages/ScanQrPage'
+import { CompaniesDiscoveryPage } from '@/modules/discovery/pages/CompaniesDiscoveryPage'
+import { EstablishmentProfilePage } from '@/modules/discovery/pages/EstablishmentProfilePage'
+import { EstablishmentsDiscoveryPage } from '@/modules/discovery/pages/EstablishmentsDiscoveryPage'
 
 function HomeRedirect() {
   const { user } = useAuth()
@@ -38,13 +41,18 @@ export function AppRouter() {
           </Route>
           <Route element={<RoleRoute allow={['company']} />}>
             <Route path="/company" element={<CompanyDashboard />} />
+            <Route path="/company/establishments" element={<EstablishmentsDiscoveryPage />} />
+            <Route path="/company/establishments/:id" element={<EstablishmentProfilePage />} />
           </Route>
           <Route element={<RoleRoute allow={['employee']} />}>
             <Route path="/employee" element={<EmployeeDashboard />} />
+            <Route path="/employee/establishments" element={<EstablishmentsDiscoveryPage />} />
+            <Route path="/employee/establishments/:id" element={<EstablishmentProfilePage />} />
           </Route>
           <Route element={<RoleRoute allow={['establishment']} />}>
             <Route path="/establishment" element={<EstablishmentDashboard />} />
             <Route path="/establishment/scan" element={<ScanQrPage />} />
+            <Route path="/establishment/companies" element={<CompaniesDiscoveryPage />} />
           </Route>
         </Route>
       </Route>

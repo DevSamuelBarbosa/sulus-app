@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { initials } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -28,15 +29,6 @@ import {
 } from '@/modules/companies/hooks/useCompany'
 import { EmployeeFormDialog } from '@/modules/companies/components/EmployeeFormDialog'
 import type { Employee } from '@/modules/companies/types'
-
-function initials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('')
-}
 
 export function EmployeesPanel() {
   const [search, setSearch] = useState('')

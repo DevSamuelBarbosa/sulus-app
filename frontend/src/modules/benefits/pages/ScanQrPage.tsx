@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isAxiosError } from 'axios'
 import { CheckCircle2, Home, ScanLine } from 'lucide-react'
+import { initials } from '@/lib/utils'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -19,15 +20,6 @@ import { QrScanner } from '@/modules/benefits/components/QrScanner'
 import { useRegisterBenefitUsage, useValidateQrToken } from '@/modules/benefits/hooks/useBenefits'
 import type { QrValidation } from '@/modules/qrcode/types'
 import type { ApiError } from '@/shared/types'
-
-function initials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('')
-}
 
 function errorMessage(err: unknown, fallback: string): string {
   return (isAxiosError<ApiError>(err) ? err.response?.data.message : undefined) ?? fallback

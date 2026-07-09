@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { QrCode } from 'lucide-react'
+import { QrCode, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -24,6 +24,23 @@ export function EmployeeDashboard() {
             <Link to="/employee/qrcode">
               <QrCode className="size-5" />
               Gerar QR Code
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Estabelecimentos parceiros</CardTitle>
+          <CardDescription>
+            Veja onde você pode usar o benefício — busque por nome, categoria ou cidade.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button asChild variant="outline" size="lg" className="w-full gap-2 sm:w-auto">
+            <Link to="/employee/establishments">
+              <Search className="size-5" />
+              Buscar estabelecimentos
             </Link>
           </Button>
         </CardContent>
