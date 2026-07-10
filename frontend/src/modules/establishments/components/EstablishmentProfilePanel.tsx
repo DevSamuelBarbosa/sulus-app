@@ -99,7 +99,13 @@ function EstablishmentProfileForm({ profile }: { profile: EstablishmentProfile }
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="name">Nome</Label>
-            <Input id="name" value={form.name} onChange={(e) => patch({ name: e.target.value })} required />
+            <Input
+              id="name"
+              value={form.name}
+              onChange={(e) => patch({ name: e.target.value })}
+              placeholder="Nome do estabelecimento"
+              required
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -124,7 +130,12 @@ function EstablishmentProfileForm({ profile }: { profile: EstablishmentProfile }
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="phone">Telefone</Label>
-              <Input id="phone" value={form.phone} onChange={(e) => patch({ phone: e.target.value })} />
+              <Input
+                id="phone"
+                value={form.phone}
+                onChange={(e) => patch({ phone: e.target.value })}
+                placeholder="(00) 00000-0000"
+              />
             </div>
           </div>
 

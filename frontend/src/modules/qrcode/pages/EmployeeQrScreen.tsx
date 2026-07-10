@@ -3,6 +3,7 @@ import { ArrowLeft, CheckCircle2, Home, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { QrCodeImage } from '@/modules/qrcode/components/QrCodeImage'
 import { useQrToken } from '@/modules/qrcode/hooks/useQrToken'
+import { LogoMark } from '@/shared/components/Logo'
 
 /**
  * Deliberately chrome-less (no DashboardLayout/sidebar): the employee mostly
@@ -26,6 +27,7 @@ export function EmployeeQrScreen() {
             <ArrowLeft className="size-5" />
           </Link>
         </Button>
+        <LogoMark className="size-7" />
         <span className="text-lg font-semibold">
           <span className="text-primary">Sulus</span> Benefícios
         </span>

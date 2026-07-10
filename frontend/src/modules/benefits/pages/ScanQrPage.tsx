@@ -71,7 +71,7 @@ export function ScanQrPage() {
   return (
     <section className="flex flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-semibold text-tertiary">Validar benefício</h2>
+        <h2 className="text-2xl font-semibold text-foreground">Validar benefício</h2>
         <p className="text-muted-foreground">Escaneie o QR Code do cliente para liberar o benefício.</p>
       </div>
 

@@ -162,6 +162,7 @@ function EstablishmentForm({
                 id="e_user_name"
                 value={profile.user_name}
                 onChange={(e) => patch({ user_name: e.target.value })}
+                placeholder="Nome do responsável"
                 required
               />
             </div>
@@ -173,6 +174,7 @@ function EstablishmentForm({
                   type="email"
                   value={profile.email}
                   onChange={(e) => patch({ email: e.target.value })}
+                  placeholder="email@estabelecimento.com"
                   required
                 />
               </div>
@@ -183,6 +185,7 @@ function EstablishmentForm({
                   type="password"
                   value={profile.password}
                   onChange={(e) => patch({ password: e.target.value })}
+                  placeholder="Mínimo 8 caracteres"
                   minLength={8}
                   required
                 />
@@ -193,7 +196,13 @@ function EstablishmentForm({
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="e_name">Nome do estabelecimento</Label>
-          <Input id="e_name" value={profile.name} onChange={(e) => patch({ name: e.target.value })} required />
+          <Input
+            id="e_name"
+            value={profile.name}
+            onChange={(e) => patch({ name: e.target.value })}
+            placeholder="Nome do estabelecimento"
+            required
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -203,6 +212,7 @@ function EstablishmentForm({
               id="e_cnpj"
               value={profile.cnpj}
               onChange={(e) => patch({ cnpj: e.target.value.replace(/\D/g, '') })}
+              placeholder="Somente números"
               maxLength={14}
               required
             />
@@ -229,7 +239,12 @@ function EstablishmentForm({
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="e_phone">Telefone</Label>
-          <Input id="e_phone" value={profile.phone} onChange={(e) => patch({ phone: e.target.value })} />
+          <Input
+            id="e_phone"
+            value={profile.phone}
+            onChange={(e) => patch({ phone: e.target.value })}
+            placeholder="(00) 00000-0000"
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -238,6 +253,7 @@ function EstablishmentForm({
             id="e_description"
             value={profile.description}
             onChange={(e) => patch({ description: e.target.value })}
+            placeholder="Descreva o estabelecimento (opcional)"
             rows={3}
           />
         </div>

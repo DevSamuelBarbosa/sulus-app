@@ -46,7 +46,7 @@ export function EstablishmentProfilePage() {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="text-xl font-semibold text-tertiary">{establishment.name}</h2>
+              <h2 className="text-xl font-semibold text-foreground">{establishment.name}</h2>
               {establishment.category && <Badge variant="secondary">{establishment.category.name}</Badge>}
             </div>
           </CardHeader>

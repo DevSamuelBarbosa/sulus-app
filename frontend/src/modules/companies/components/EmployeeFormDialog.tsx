@@ -168,6 +168,7 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
                 type="email"
                 value={form.email}
                 onChange={(e) => patch({ email: e.target.value })}
+                placeholder="email@empresa.com"
                 required
               />
             </div>
@@ -178,6 +179,7 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
                 type="password"
                 value={form.password}
                 onChange={(e) => patch({ password: e.target.value })}
+                placeholder="Mínimo 8 caracteres"
                 minLength={8}
                 required
               />
@@ -191,6 +193,7 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
             id="full_name"
             value={form.full_name}
             onChange={(e) => patch({ full_name: e.target.value })}
+            placeholder="Nome completo"
             required
           />
         </div>
@@ -202,13 +205,19 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
               id="cpf"
               value={form.cpf}
               onChange={(e) => patch({ cpf: e.target.value.replace(/\D/g, '') })}
+              placeholder="Somente números"
               maxLength={11}
               required
             />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="phone">Telefone</Label>
-            <Input id="phone" value={form.phone} onChange={(e) => patch({ phone: e.target.value })} />
+            <Input
+              id="phone"
+              value={form.phone}
+              onChange={(e) => patch({ phone: e.target.value })}
+              placeholder="(00) 00000-0000"
+            />
           </div>
         </div>
 

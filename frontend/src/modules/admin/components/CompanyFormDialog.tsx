@@ -142,6 +142,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
                 id="user_name"
                 value={profile.user_name}
                 onChange={(e) => patch({ user_name: e.target.value })}
+                placeholder="Nome do responsável"
                 required
               />
             </div>
@@ -153,6 +154,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
                   type="email"
                   value={profile.email}
                   onChange={(e) => patch({ email: e.target.value })}
+                  placeholder="email@empresa.com"
                   required
                 />
               </div>
@@ -163,6 +165,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
                   type="password"
                   value={profile.password}
                   onChange={(e) => patch({ password: e.target.value })}
+                  placeholder="Mínimo 8 caracteres"
                   minLength={8}
                   required
                 />
@@ -177,6 +180,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
             id="legal_name"
             value={profile.legal_name}
             onChange={(e) => patch({ legal_name: e.target.value })}
+            placeholder="Razão social"
             required
           />
         </div>
@@ -188,6 +192,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
               id="trade_name"
               value={profile.trade_name}
               onChange={(e) => patch({ trade_name: e.target.value })}
+              placeholder="Nome fantasia (opcional)"
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -196,6 +201,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
               id="cnpj"
               value={profile.cnpj}
               onChange={(e) => patch({ cnpj: e.target.value.replace(/\D/g, '') })}
+              placeholder="Somente números"
               maxLength={14}
               required
             />
@@ -205,7 +211,12 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="phone">Telefone</Label>
-            <Input id="phone" value={profile.phone} onChange={(e) => patch({ phone: e.target.value })} />
+            <Input
+              id="phone"
+              value={profile.phone}
+              onChange={(e) => patch({ phone: e.target.value })}
+              placeholder="(00) 0000-0000"
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="contact_email">E-mail de contato</Label>
@@ -214,6 +225,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
               type="email"
               value={profile.contact_email}
               onChange={(e) => patch({ contact_email: e.target.value })}
+              placeholder="contato@empresa.com"
             />
           </div>
         </div>

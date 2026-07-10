@@ -44,6 +44,22 @@ export function QrScanner({ active, onScan }: QrScannerProps) {
 
     let scanner: Html5Qrcode
     let stopped = false
+    // Tracks whether start() actually resolved, i.e. the scanner is really
+    // running. Without this guard, calling stop() while start() is still
+    // pending — e.g. React StrictMode's mount→cleanup→mount dance racing a
+    // slow/absent desktop camera — throws synchronously ("Cannot stop,
+    // scanner is not running or paused"), which isn't a rejected promise
+    // and so isn't caught by a plain .catch(), crashing past this
+    // component entirely.
+    let started = false
+
+    const safeStop = () => {
+      try {
+        return scanner.stop().catch(() => {})
+      } catch {
+        return Promise.resolve()
+      }
+    }
 
     try {
       scanner = new Html5Qrcode(REGION_ID)
@@ -60,22 +76,36 @@ export function QrScanner({ active, onScan }: QrScannerProps) {
           if (!stopped) {
             stopped = true
             onScanRef.current(decodedText)
-            void scanner.stop().catch(() => {})
+            void safeStop()
           }
         },
         () => {
           // Per-frame decode miss — expected while the user is framing the code.
         },
       )
-      .then(() => setUnavailable(false))
+      .then(() => {
+        if (stopped) {
+          // Cleanup already ran before start() resolved — release the
+          // camera immediately instead of leaving it running orphaned.
+          void safeStop()
+          return
+        }
+        started = true
+        setUnavailable(false)
+      })
       .catch(() => {
-        // Camera unavailable or permission denied.
-        setUnavailable(true)
+        // Camera unavailable, no device, or permission denied — e.g. most
+        // desktops reaching this screen instead of a phone.
+        if (!stopped) {
+          setUnavailable(true)
+        }
       })
 
     return () => {
       stopped = true
-      void scanner.stop().catch(() => {})
+      if (started) {
+        void safeStop()
+      }
     }
   }, [active])
 

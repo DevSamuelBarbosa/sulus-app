@@ -90,6 +90,7 @@ function CompanyProfileForm({ profile }: { profile: CompanyProfile }) {
               id="legal_name"
               value={form.legal_name}
               onChange={(e) => patch({ legal_name: e.target.value })}
+              placeholder="Razão social da empresa"
               required
             />
           </div>
@@ -101,11 +102,17 @@ function CompanyProfileForm({ profile }: { profile: CompanyProfile }) {
                 id="trade_name"
                 value={form.trade_name}
                 onChange={(e) => patch({ trade_name: e.target.value })}
+                placeholder="Nome fantasia (opcional)"
               />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="phone">Telefone</Label>
-              <Input id="phone" value={form.phone} onChange={(e) => patch({ phone: e.target.value })} />
+              <Input
+                id="phone"
+                value={form.phone}
+                onChange={(e) => patch({ phone: e.target.value })}
+                placeholder="(00) 0000-0000"
+              />
             </div>
           </div>
 
@@ -116,6 +123,7 @@ function CompanyProfileForm({ profile }: { profile: CompanyProfile }) {
               type="email"
               value={form.contact_email}
               onChange={(e) => patch({ contact_email: e.target.value })}
+              placeholder="contato@empresa.com"
             />
           </div>
 

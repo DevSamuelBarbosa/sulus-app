@@ -40,7 +40,7 @@ export function EstablishmentsDiscoveryPage() {
   return (
     <section className="flex flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-semibold text-tertiary">Estabelecimentos parceiros</h2>
+        <h2 className="text-2xl font-semibold text-foreground">Estabelecimentos parceiros</h2>
         <p className="text-muted-foreground">
           Encontre onde usar o benefício — busque por nome, categoria ou localização.
         </p>

@@ -116,13 +116,19 @@ export function AddressForm({ value, onChange }: AddressFormProps) {
           id="logradouro"
           value={value.logradouro}
           onChange={(e) => patch({ logradouro: e.target.value })}
+          placeholder="Rua, avenida…"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="numero">Número</Label>
-          <Input id="numero" value={value.numero} onChange={(e) => patch({ numero: e.target.value })} />
+          <Input
+            id="numero"
+            value={value.numero}
+            onChange={(e) => patch({ numero: e.target.value })}
+            placeholder="123"
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="complemento">Complemento</Label>
@@ -130,13 +136,19 @@ export function AddressForm({ value, onChange }: AddressFormProps) {
             id="complemento"
             value={value.complemento}
             onChange={(e) => patch({ complemento: e.target.value })}
+            placeholder="Apto, sala… (opcional)"
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="bairro">Bairro</Label>
-        <Input id="bairro" value={value.bairro} onChange={(e) => patch({ bairro: e.target.value })} />
+        <Input
+          id="bairro"
+          value={value.bairro}
+          onChange={(e) => patch({ bairro: e.target.value })}
+          placeholder="Bairro"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

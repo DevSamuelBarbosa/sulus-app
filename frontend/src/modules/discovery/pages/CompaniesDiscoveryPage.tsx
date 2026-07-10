@@ -23,7 +23,7 @@ export function CompaniesDiscoveryPage() {
   return (
     <section className="flex flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-semibold text-tertiary">Empresas parceiras</h2>
+        <h2 className="text-2xl font-semibold text-foreground">Empresas parceiras</h2>
         <p className="text-muted-foreground">
           Empresas cujos funcionários podem usar o benefício aqui.
         </p>

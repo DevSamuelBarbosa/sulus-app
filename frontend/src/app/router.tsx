@@ -7,9 +7,14 @@ import { DashboardLayout } from '@/app/layouts/DashboardLayout'
 import { LoginPage } from '@/modules/auth/pages/LoginPage'
 import { AccountInactivePage } from '@/modules/auth/pages/AccountInactivePage'
 import { AdminDashboard } from '@/modules/admin/pages/AdminDashboard'
+import { AdminCompaniesPage } from '@/modules/admin/pages/AdminCompaniesPage'
+import { AdminEstablishmentsPage } from '@/modules/admin/pages/AdminEstablishmentsPage'
 import { CompanyDashboard } from '@/modules/companies/pages/CompanyDashboard'
+import { CompanyEmployeesPage } from '@/modules/companies/pages/CompanyEmployeesPage'
+import { CompanyProfilePage } from '@/modules/companies/pages/CompanyProfilePage'
 import { EmployeeDashboard } from '@/modules/employees/pages/EmployeeDashboard'
 import { EstablishmentDashboard } from '@/modules/establishments/pages/EstablishmentDashboard'
+import { EstablishmentSettingsPage } from '@/modules/establishments/pages/EstablishmentSettingsPage'
 import { EmployeeQrScreen } from '@/modules/qrcode/pages/EmployeeQrScreen'
 import { ScanQrPage } from '@/modules/benefits/pages/ScanQrPage'
 import { CompaniesDiscoveryPage } from '@/modules/discovery/pages/CompaniesDiscoveryPage'
@@ -38,11 +43,15 @@ export function AppRouter() {
 
           <Route element={<RoleRoute allow={['admin']} />}>
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/companies" element={<AdminCompaniesPage />} />
+            <Route path="/admin/establishments" element={<AdminEstablishmentsPage />} />
           </Route>
           <Route element={<RoleRoute allow={['company']} />}>
             <Route path="/company" element={<CompanyDashboard />} />
+            <Route path="/company/employees" element={<CompanyEmployeesPage />} />
             <Route path="/company/establishments" element={<EstablishmentsDiscoveryPage />} />
             <Route path="/company/establishments/:id" element={<EstablishmentProfilePage />} />
+            <Route path="/company/profile" element={<CompanyProfilePage />} />
           </Route>
           <Route element={<RoleRoute allow={['employee']} />}>
             <Route path="/employee" element={<EmployeeDashboard />} />
@@ -53,6 +62,7 @@ export function AppRouter() {
             <Route path="/establishment" element={<EstablishmentDashboard />} />
             <Route path="/establishment/scan" element={<ScanQrPage />} />
             <Route path="/establishment/companies" element={<CompaniesDiscoveryPage />} />
+            <Route path="/establishment/profile" element={<EstablishmentSettingsPage />} />
           </Route>
         </Route>
       </Route>
