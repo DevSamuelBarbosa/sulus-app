@@ -24,6 +24,17 @@
   --tertiary: #0a0a0af2;
   --tertiary-foreground: #ffffff;
 
+  /* Cores tonais (Material 3 "container" roles) — derivadas das cores da marca */
+  --primary-container: color-mix(in oklch, var(--primary), white 82%);
+  --on-primary-container: color-mix(in oklch, var(--primary), black 20%);
+  --secondary-container: color-mix(in oklch, var(--secondary), white 78%);
+  --on-secondary-container: color-mix(in oklch, var(--secondary), black 35%);
+
+  /* Escala de elevação (Material 3 — sombra suave em vez de borda) */
+  --elevation-1: 0 1px 2px 0 color-mix(in oklch, var(--foreground), transparent 92%), 0 1px 3px 1px color-mix(in oklch, var(--foreground), transparent 90%);
+  --elevation-2: 0 1px 2px 0 color-mix(in oklch, var(--foreground), transparent 88%), 0 2px 6px 2px color-mix(in oklch, var(--foreground), transparent 88%);
+  --elevation-3: 0 1px 3px 0 color-mix(in oklch, var(--foreground), transparent 85%), 0 4px 8px 3px color-mix(in oklch, var(--foreground), transparent 85%);
+
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
@@ -37,7 +48,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --sidebar: var(--tertiary);
   --sidebar-foreground: var(--tertiary-foreground);
   --sidebar-primary: var(--primary);
@@ -82,8 +93,12 @@ body {
   --color-muted: var(--muted);
   --color-tertiary-foreground: var(--tertiary-foreground);
   --color-tertiary: var(--tertiary);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-secondary-container: var(--secondary-container);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-primary-container: var(--primary-container);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
   --color-popover-foreground: var(--popover-foreground);
@@ -122,6 +137,15 @@ body {
   --chart-5: oklch(0.269 0 0);
   --sidebar-accent: oklch(1 0 0 / 10%);
   --sidebar-border: oklch(1 0 0 / 10%);
+
+  --primary-container: color-mix(in oklch, var(--primary), black 65%);
+  --on-primary-container: color-mix(in oklch, var(--primary), white 75%);
+  --secondary-container: color-mix(in oklch, var(--secondary), black 70%);
+  --on-secondary-container: color-mix(in oklch, var(--secondary), white 70%);
+
+  --elevation-1: 0 1px 2px 0 color-mix(in oklch, black, transparent 60%), 0 1px 3px 1px color-mix(in oklch, black, transparent 50%);
+  --elevation-2: 0 1px 2px 0 color-mix(in oklch, black, transparent 50%), 0 2px 6px 2px color-mix(in oklch, black, transparent 40%);
+  --elevation-3: 0 1px 3px 0 color-mix(in oklch, black, transparent 40%), 0 4px 8px 3px color-mix(in oklch, black, transparent 30%);
 }
 
 @layer base {
