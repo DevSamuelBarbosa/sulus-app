@@ -1,4 +1,4 @@
-import { Building2, LayoutDashboard, QrCode, ScanLine, Settings, Store, Users } from 'lucide-react'
+import { Building2, History, LayoutDashboard, QrCode, ScanLine, Settings, Store, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Role } from '@/shared/types'
 
@@ -13,22 +13,26 @@ export const navItemsByRole: Record<Role, NavItem[]> = {
     { title: 'Visão geral', url: '/admin', icon: LayoutDashboard },
     { title: 'Empresas', url: '/admin/companies', icon: Building2 },
     { title: 'Estabelecimentos', url: '/admin/establishments', icon: Store },
+    { title: 'Relatórios', url: '/admin/reports', icon: History },
   ],
   company: [
     { title: 'Visão geral', url: '/company', icon: LayoutDashboard },
     { title: 'Funcionários', url: '/company/employees', icon: Users },
     { title: 'Estabelecimentos parceiros', url: '/company/establishments', icon: Store },
+    { title: 'Histórico', url: '/company/usages', icon: History },
     { title: 'Meu perfil', url: '/company/profile', icon: Settings },
   ],
   employee: [
     { title: 'Visão geral', url: '/employee', icon: LayoutDashboard },
     { title: 'Gerar QR Code', url: '/employee/qrcode', icon: QrCode },
     { title: 'Estabelecimentos parceiros', url: '/employee/establishments', icon: Store },
+    { title: 'Meu histórico', url: '/employee/usages', icon: History },
   ],
   establishment: [
     { title: 'Visão geral', url: '/establishment', icon: LayoutDashboard },
     { title: 'Validar QR Code', url: '/establishment/scan', icon: ScanLine },
     { title: 'Empresas parceiras', url: '/establishment/companies', icon: Building2 },
+    { title: 'Histórico', url: '/establishment/usages', icon: History },
     { title: 'Meu perfil', url: '/establishment/profile', icon: Settings },
   ],
 }

@@ -2,32 +2,8 @@ import { Link } from 'react-router-dom'
 import { Building2, Store } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { StatCard } from '@/shared/components/StatCard'
 import { useAdminStats } from '@/modules/admin/hooks/useAdmin'
-
-function StatCard({
-  label,
-  value,
-  accent,
-}: {
-  label: string
-  value: number | undefined
-  /** Marks counts that represent something currently active/healthy. */
-  accent?: boolean
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-          {accent && <span className="size-1.5 shrink-0 rounded-full bg-secondary" aria-hidden />}
-          {label}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-3xl font-semibold text-foreground">{value ?? '—'}</p>
-      </CardContent>
-    </Card>
-  )
-}
 
 export function AdminDashboard() {
   const { data: stats } = useAdminStats()

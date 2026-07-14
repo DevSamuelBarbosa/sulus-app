@@ -14,6 +14,13 @@ export function useAdminStats() {
   })
 }
 
+export function useAdminReports() {
+  return useQuery({
+    queryKey: ['admin', 'reports'],
+    queryFn: () => adminApi.getReports(),
+  })
+}
+
 export function useAdminCompanies(search: string) {
   return useQuery({
     queryKey: ['admin', 'companies', search],

@@ -26,6 +26,4 @@ require __DIR__.'/api/establishment.php';
 require __DIR__.'/api/qrcode.php';
 require __DIR__.'/api/benefits.php';
 require __DIR__.'/api/discovery.php';
-
-// Próximas fases (Fase 5+):
-// require __DIR__.'/api/reports.php';
+require __DIR__.'/api/reports.php';

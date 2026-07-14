@@ -1,11 +1,13 @@
 import { httpClient } from '@/shared/api/httpClient'
-import type { Paginated } from '@/shared/types'
+import type { BenefitUsage, Paginated } from '@/shared/types'
 import type {
   CompanyProfile,
+  CompanyReport,
   CreateEmployeePayload,
   Employee,
   UpdateCompanyProfilePayload,
   UpdateEmployeePayload,
+  UsageFilters,
 } from '@/modules/companies/types'
 
 export const companyApi = {
@@ -55,6 +57,22 @@ export const companyApi = {
         `/company/employees/${id}/photo`,
         form,
       )
+      return data.data
+    },
+  },
+
+  usages: {
+    async list(filters: UsageFilters = {}): Promise<Paginated<BenefitUsage>> {
+      const { data } = await httpClient.get<Paginated<BenefitUsage>>('/company/usages', {
+        params: filters,
+      })
+      return data
+    },
+  },
+
+  reports: {
+    async get(): Promise<CompanyReport> {
+      const { data } = await httpClient.get<{ data: CompanyReport }>('/company/reports')
       return data.data
     },
   },

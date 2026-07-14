@@ -69,3 +69,18 @@ export interface UpdateEmployeePayload {
   phone?: string | null
   hired_at?: string | null
 }
+
+export interface CompanyReport {
+  total_usages: number
+  usages_this_month: number
+  active_employees_count: number
+  top_establishments: { name: string; count: number }[]
+}
+
+export interface UsageFilters {
+  search?: string
+  employee_id?: number
+  from?: string
+  to?: string
+  page?: number
+}

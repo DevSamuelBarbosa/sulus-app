@@ -4,6 +4,7 @@ import type {
   CreateEmployeePayload,
   UpdateCompanyProfilePayload,
   UpdateEmployeePayload,
+  UsageFilters,
 } from '@/modules/companies/types'
 
 export function useCompanyProfile() {
@@ -75,4 +76,18 @@ export function useUploadEmployeePhoto() {
 
 function invalidateEmployees(queryClient: ReturnType<typeof useQueryClient>): void {
   void queryClient.invalidateQueries({ queryKey: ['company', 'employees'] })
+}
+
+export function useCompanyUsages(filters: UsageFilters) {
+  return useQuery({
+    queryKey: ['company', 'usages', filters],
+    queryFn: () => companyApi.usages.list(filters),
+  })
+}
+
+export function useCompanyReport() {
+  return useQuery({
+    queryKey: ['company', 'reports'],
+    queryFn: () => companyApi.reports.get(),
+  })
 }

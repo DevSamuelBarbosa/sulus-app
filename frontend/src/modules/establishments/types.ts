@@ -38,3 +38,17 @@ export interface UpdateEstablishmentProfilePayload {
   bairro?: string | null
   city_id?: number | null
 }
+
+export interface EstablishmentReport {
+  total_usages: number
+  usages_this_month: number
+  unique_companies_count: number
+  top_companies: { name: string; count: number }[]
+}
+
+export interface UsageFilters {
+  search?: string
+  from?: string
+  to?: string
+  page?: number
+}

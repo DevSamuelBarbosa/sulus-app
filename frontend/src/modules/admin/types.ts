@@ -54,6 +54,13 @@ export interface AdminStats {
   employees_count: number
 }
 
+export interface AdminReport {
+  total_usages: number
+  usages_this_month: number
+  top_companies: { name: string; count: number }[]
+  top_establishments: { name: string; count: number }[]
+}
+
 interface AddressFields {
   cep?: string | null
   logradouro?: string | null

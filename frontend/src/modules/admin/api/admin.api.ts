@@ -3,6 +3,7 @@ import type { Paginated } from '@/shared/types'
 import type {
   AdminCompany,
   AdminEstablishment,
+  AdminReport,
   AdminStats,
   CreateCompanyPayload,
   CreateEstablishmentPayload,
@@ -13,6 +14,11 @@ import type {
 export const adminApi = {
   async getStats(): Promise<AdminStats> {
     const { data } = await httpClient.get<{ data: AdminStats }>('/admin/stats')
+    return data.data
+  },
+
+  async getReports(): Promise<AdminReport> {
+    const { data } = await httpClient.get<{ data: AdminReport }>('/admin/reports')
     return data.data
   },
 

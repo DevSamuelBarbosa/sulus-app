@@ -18,6 +18,9 @@ class BenefitUsageResource extends JsonResource
             'id' => $this->id,
             'employee_name' => $this->employee_name_snapshot,
             'company_name' => $this->company_name_snapshot,
+            // Not snapshotted (see benefit_usages migration) — establishments
+            // aren't expected to rename often, so the current name is fine here.
+            'establishment_name' => $this->whenLoaded('establishment', fn () => $this->establishment?->name),
             'used_at' => $this->used_at,
         ];
     }

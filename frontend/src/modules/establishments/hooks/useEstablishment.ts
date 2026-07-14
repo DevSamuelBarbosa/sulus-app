@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { establishmentApi } from '@/modules/establishments/api/establishment.api'
-import type { UpdateEstablishmentProfilePayload } from '@/modules/establishments/types'
+import type { UpdateEstablishmentProfilePayload, UsageFilters } from '@/modules/establishments/types'
 
 export function useEstablishmentProfile() {
   return useQuery({
@@ -16,5 +16,19 @@ export function useUpdateEstablishmentProfile() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['establishment', 'profile'] })
     },
+  })
+}
+
+export function useEstablishmentUsages(filters: UsageFilters) {
+  return useQuery({
+    queryKey: ['establishment', 'usages', filters],
+    queryFn: () => establishmentApi.usages.list(filters),
+  })
+}
+
+export function useEstablishmentReport() {
+  return useQuery({
+    queryKey: ['establishment', 'reports'],
+    queryFn: () => establishmentApi.reports.get(),
   })
 }
