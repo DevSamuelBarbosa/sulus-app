@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/modules/auth/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -22,9 +24,16 @@ export function CompaniesPanel() {
   const { data, isLoading } = useAdminCompanies(search)
   const deleteCompany = useDeleteCompany()
   const updateCompany = useUpdateCompany()
+  const { impersonate } = useAuth()
+  const navigate = useNavigate()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<AdminCompany | null>(null)
   const [deleting, setDeleting] = useState<AdminCompany | null>(null)
+
+  async function handleImpersonate(company: AdminCompany) {
+    await impersonate(company.user_id)
+    navigate('/company')
+  }
 
   function openCreate() {
     setEditing(null)
@@ -103,6 +112,9 @@ export function CompaniesPanel() {
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => openEdit(company)}>
                     Editar
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => void handleImpersonate(company)}>
+                    Impersonar
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => setDeleting(company)}>
                     Excluir

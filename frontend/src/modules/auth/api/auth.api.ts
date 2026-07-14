@@ -16,4 +16,14 @@ export const authApi = {
   async logout(): Promise<void> {
     await httpClient.post('/auth/logout')
   },
+
+  async impersonate(userId: number): Promise<LoginResponse> {
+    const { data } = await httpClient.post<LoginResponse>(`/admin/impersonate/${userId}`)
+    return data
+  },
+
+  async stopImpersonation(): Promise<LoginResponse> {
+    const { data } = await httpClient.delete<LoginResponse>('/admin/impersonate')
+    return data
+  },
 }

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/modules/auth/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -26,9 +28,16 @@ export function EstablishmentsPanel() {
   const { data, isLoading } = useAdminEstablishments(search)
   const deleteEstablishment = useDeleteEstablishment()
   const updateEstablishment = useUpdateEstablishment()
+  const { impersonate } = useAuth()
+  const navigate = useNavigate()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<AdminEstablishment | null>(null)
   const [deleting, setDeleting] = useState<AdminEstablishment | null>(null)
+
+  async function handleImpersonate(establishment: AdminEstablishment) {
+    await impersonate(establishment.user_id)
+    navigate('/establishment')
+  }
 
   function openCreate() {
     setEditing(null)
@@ -111,6 +120,9 @@ export function EstablishmentsPanel() {
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => openEdit(establishment)}>
                     Editar
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => void handleImpersonate(establishment)}>
+                    Impersonar
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => setDeleting(establishment)}>
                     Excluir

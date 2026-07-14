@@ -10,6 +10,8 @@ interface AuthContextValue {
   isLoading: boolean
   login: (payload: LoginPayload) => Promise<AuthUser>
   logout: () => Promise<void>
+  impersonate: (userId: number) => Promise<AuthUser>
+  stopImpersonation: () => Promise<AuthUser>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -47,9 +49,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const impersonate = useCallback(async (userId: number) => {
+    const { token, user: impersonatedUser } = await authApi.impersonate(userId)
+    tokenStorage.set(token)
+    setUser(impersonatedUser)
+    return impersonatedUser
+  }, [])
+
+  const stopImpersonation = useCallback(async () => {
+    const { token, user: adminUser } = await authApi.stopImpersonation()
+    tokenStorage.set(token)
+    setUser(adminUser)
+    return adminUser
+  }, [])
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: user !== null, isLoading, login, logout }),
-    [user, isLoading, login, logout],
+    () => ({
+      user,
+      isAuthenticated: user !== null,
+      isLoading,
+      login,
+      logout,
+      impersonate,
+      stopImpersonation,
+    }),
+    [user, isLoading, login, logout, impersonate, stopImpersonation],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

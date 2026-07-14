@@ -12,6 +12,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+        navigateFallback: '/index.html',
+      },
       manifest: {
         name: 'Sulus Benefícios',
         short_name: 'Sulus',

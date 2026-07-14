@@ -5,6 +5,7 @@ export interface AuthUser {
   name: string
   email: string
   role: Role
+  impersonated_by: { id: number; name: string } | null
 }
 
 export interface LoginPayload {
