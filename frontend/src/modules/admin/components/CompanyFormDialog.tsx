@@ -11,7 +11,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { FormSection } from '@/shared/components/FormSection'
 import { AddressForm } from '@/modules/localization/components/AddressForm'
 import { emptyAddress } from '@/modules/localization/types'
 import type { AddressValue } from '@/modules/localization/types'
@@ -40,7 +42,7 @@ function addressFromCompany(company?: AdminCompany | null): AddressValue {
 export function CompanyFormDialog({ open, onOpenChange, company }: CompanyFormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+      <DialogContent className="max-h-[90vh] sm:max-w-2xl overflow-y-auto">
         {open && (
           <CompanyForm
             key={company?.id ?? 'create'}
@@ -133,104 +135,115 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
         </DialogDescription>
       </DialogHeader>
 
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
         {!isEdit && (
           <>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="user_name">Nome do responsável (login)</Label>
-              <Input
-                id="user_name"
-                value={profile.user_name}
-                onChange={(e) => patch({ user_name: e.target.value })}
-                placeholder="Nome do responsável"
-                required
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+            <FormSection title="Acesso" description="Credenciais de login do responsável pela empresa.">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="email">E-mail de login</Label>
+                <Label htmlFor="user_name">Nome do responsável (login)</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  value={profile.email}
-                  onChange={(e) => patch({ email: e.target.value })}
-                  placeholder="email@empresa.com"
+                  id="user_name"
+                  value={profile.user_name}
+                  onChange={(e) => patch({ user_name: e.target.value })}
+                  placeholder="Nome do responsável"
                   required
                 />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={profile.password}
-                  onChange={(e) => patch({ password: e.target.value })}
-                  placeholder="Mínimo 8 caracteres"
-                  minLength={8}
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="email">E-mail de login</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={profile.email}
+                    onChange={(e) => patch({ email: e.target.value })}
+                    placeholder="email@empresa.com"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={profile.password}
+                    onChange={(e) => patch({ password: e.target.value })}
+                    placeholder="Mínimo 8 caracteres"
+                    minLength={8}
+                    required
+                  />
+                </div>
               </div>
-            </div>
+            </FormSection>
+            <Separator />
           </>
         )}
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="legal_name">Razão social</Label>
-          <Input
-            id="legal_name"
-            value={profile.legal_name}
-            onChange={(e) => patch({ legal_name: e.target.value })}
-            placeholder="Razão social"
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
+        <FormSection title="Dados da empresa">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="trade_name">Nome fantasia</Label>
+            <Label htmlFor="legal_name">Razão social</Label>
             <Input
-              id="trade_name"
-              value={profile.trade_name}
-              onChange={(e) => patch({ trade_name: e.target.value })}
-              placeholder="Nome fantasia (opcional)"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cnpj">CNPJ</Label>
-            <Input
-              id="cnpj"
-              value={profile.cnpj}
-              onChange={(e) => patch({ cnpj: e.target.value.replace(/\D/g, '') })}
-              placeholder="Somente números"
-              maxLength={14}
+              id="legal_name"
+              value={profile.legal_name}
+              onChange={(e) => patch({ legal_name: e.target.value })}
+              placeholder="Razão social"
               required
             />
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
-              value={profile.phone}
-              onChange={(e) => patch({ phone: e.target.value })}
-              placeholder="(00) 0000-0000"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="trade_name">Nome fantasia</Label>
+              <Input
+                id="trade_name"
+                value={profile.trade_name}
+                onChange={(e) => patch({ trade_name: e.target.value })}
+                placeholder="Nome fantasia (opcional)"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="cnpj">CNPJ</Label>
+              <Input
+                id="cnpj"
+                value={profile.cnpj}
+                onChange={(e) => patch({ cnpj: e.target.value.replace(/\D/g, '') })}
+                placeholder="Somente números"
+                maxLength={14}
+                required
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="contact_email">E-mail de contato</Label>
-            <Input
-              id="contact_email"
-              type="email"
-              value={profile.contact_email}
-              onChange={(e) => patch({ contact_email: e.target.value })}
-              placeholder="contato@empresa.com"
-            />
-          </div>
-        </div>
 
-        <AddressForm value={address} onChange={setAddress} />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="phone">Telefone</Label>
+              <Input
+                id="phone"
+                value={profile.phone}
+                onChange={(e) => patch({ phone: e.target.value })}
+                placeholder="(00) 0000-0000"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="contact_email">E-mail de contato</Label>
+              <Input
+                id="contact_email"
+                type="email"
+                value={profile.contact_email}
+                onChange={(e) => patch({ contact_email: e.target.value })}
+                placeholder="contato@empresa.com"
+              />
+            </div>
+          </div>
+        </FormSection>
+
+        <Separator />
+
+        <FormSection title="Endereço">
+          <AddressForm value={address} onChange={setAddress} />
+        </FormSection>
+
+        <Separator />
 
         <div className="flex items-center gap-2">
           <Switch
