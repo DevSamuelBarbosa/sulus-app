@@ -24,6 +24,7 @@ class UpdateEmployeeRequest extends FormRequest
             'cpf' => ['sometimes', 'required', 'digits:11', Rule::unique('employees', 'cpf')->ignore($employee)],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
             'hired_at' => ['sometimes', 'nullable', 'date'],
+            'city_id' => ['sometimes', 'nullable', 'integer', 'exists:cities,id'],
         ];
     }
 }

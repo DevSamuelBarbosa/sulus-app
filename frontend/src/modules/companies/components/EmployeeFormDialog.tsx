@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { StateSelect } from '@/shared/components/StateSelect'
+import { CityCombobox } from '@/shared/components/CityCombobox'
 import {
   useCreateEmployee,
   useUpdateEmployee,
@@ -65,6 +67,8 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
     phone: employee?.phone ?? '',
     hired_at: employee?.hired_at ?? '',
   })
+  const [stateId, setStateId] = useState<number | null>(employee?.city?.state_id ?? null)
+  const [cityId, setCityId] = useState<number | null>(employee?.city_id ?? null)
   const [error, setError] = useState<string | null>(null)
 
   const patch = (partial: Partial<typeof form>) => setForm((prev) => ({ ...prev, ...partial }))
@@ -95,6 +99,7 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
             cpf: form.cpf,
             phone: form.phone || null,
             hired_at: form.hired_at || null,
+            city_id: cityId,
           },
         })
       } else {
@@ -105,6 +110,7 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
           cpf: form.cpf,
           phone: form.phone || null,
           hired_at: form.hired_at || null,
+          city_id: cityId,
         })
       }
       onSaved()
@@ -230,6 +236,32 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
             onChange={(e) => patch({ hired_at: e.target.value })}
             className="max-w-xs"
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="employee-state">Estado</Label>
+            <StateSelect
+              id="employee-state"
+              value={stateId}
+              onChange={(next) => {
+                setStateId(next)
+                setCityId(null)
+              }}
+              placeholder="Opcional — home office"
+              className="w-full"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="employee-city">Cidade</Label>
+            <CityCombobox
+              id="employee-city"
+              stateId={stateId}
+              value={cityId}
+              onChange={setCityId}
+              placeholder="Selecione…"
+            />
+          </div>
         </div>
 
         {error && (

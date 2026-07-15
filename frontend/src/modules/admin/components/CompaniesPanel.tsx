@@ -15,13 +15,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { RowActionsMenu } from '@/shared/components/RowActionsMenu'
+import { LocationFilter } from '@/modules/discovery/components/LocationFilter'
 import { useAdminCompanies, useDeleteCompany, useUpdateCompany } from '@/modules/admin/hooks/useAdmin'
 import { CompanyFormDialog } from '@/modules/admin/components/CompanyFormDialog'
 import type { AdminCompany } from '@/modules/admin/types'
 
 export function CompaniesPanel() {
   const [search, setSearch] = useState('')
-  const { data, isLoading } = useAdminCompanies(search)
+  const [stateId, setStateId] = useState<number | null>(null)
+  const [cityId, setCityId] = useState<number | null>(null)
+  const { data, isLoading } = useAdminCompanies({ search, stateId, cityId })
   const deleteCompany = useDeleteCompany()
   const updateCompany = useUpdateCompany()
   const { impersonate } = useAuth()
@@ -48,12 +52,22 @@ export function CompaniesPanel() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Input
-          placeholder="Buscar por nome ou CNPJ…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
-        />
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <Input
+            placeholder="Buscar por nome ou CNPJ…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-64"
+          />
+          <LocationFilter
+            stateId={stateId}
+            cityId={cityId}
+            onChange={(next) => {
+              setStateId(next.stateId)
+              setCityId(next.cityId)
+            }}
+          />
+        </div>
         <Button onClick={openCreate}>Nova empresa</Button>
       </div>
 
@@ -97,28 +111,22 @@ export function CompaniesPanel() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={updateCompany.isPending}
-                    onClick={() =>
-                      void updateCompany.mutateAsync({
-                        id: company.id,
-                        payload: { is_active: !company.is_active },
-                      })
-                    }
-                  >
-                    {company.is_active ? 'Desativar' : 'Ativar'}
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => openEdit(company)}>
-                    Editar
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => void handleImpersonate(company)}>
-                    Impersonar
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setDeleting(company)}>
-                    Excluir
-                  </Button>
+                  <RowActionsMenu
+                    actions={[
+                      {
+                        label: company.is_active ? 'Desativar' : 'Ativar',
+                        disabled: updateCompany.isPending,
+                        onClick: () =>
+                          void updateCompany.mutateAsync({
+                            id: company.id,
+                            payload: { is_active: !company.is_active },
+                          }),
+                      },
+                      { label: 'Editar', onClick: () => openEdit(company) },
+                      { label: 'Impersonar', onClick: () => void handleImpersonate(company) },
+                      { label: 'Excluir', variant: 'destructive', onClick: () => setDeleting(company) },
+                    ]}
+                  />
                 </TableCell>
               </TableRow>
             ))}

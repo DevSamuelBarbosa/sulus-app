@@ -51,6 +51,8 @@ export interface Employee {
   benefit_status: BenefitStatus
   benefit_status_label: string
   hired_at: string | null
+  city_id: number | null
+  city: CompanyCity | null
   created_at: string
 }
 
@@ -61,6 +63,7 @@ export interface CreateEmployeePayload {
   cpf: string
   phone?: string | null
   hired_at?: string | null
+  city_id?: number | null
 }
 
 export interface UpdateEmployeePayload {
@@ -68,6 +71,7 @@ export interface UpdateEmployeePayload {
   cpf?: string
   phone?: string | null
   hired_at?: string | null
+  city_id?: number | null
 }
 
 export interface CompanyReport {
@@ -75,6 +79,13 @@ export interface CompanyReport {
   usages_this_month: number
   active_employees_count: number
   top_establishments: { name: string; count: number }[]
+}
+
+export interface EmployeeFilters {
+  search?: string
+  status?: string
+  stateId?: number | null
+  cityId?: number | null
 }
 
 export interface UsageFilters {

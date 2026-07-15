@@ -87,6 +87,7 @@ export function AppSidebar() {
             <SidebarMenuButton
               onClick={toggleTheme}
               tooltip={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+              className='cursor-pointer'
             >
               {theme === 'dark' ? <Sun /> : <Moon />}
               <span>{theme === 'dark' ? 'Modo claro' : 'Modo escuro'}</span>
@@ -98,7 +99,7 @@ export function AppSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
                 >
                   <Avatar className="size-7 rounded-md">
                     <AvatarFallback className="rounded-md bg-primary text-xs text-primary-foreground">

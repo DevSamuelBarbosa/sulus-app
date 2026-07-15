@@ -5,6 +5,7 @@ import type {
   CompanyReport,
   CreateEmployeePayload,
   Employee,
+  EmployeeFilters,
   UpdateCompanyProfilePayload,
   UpdateEmployeePayload,
   UsageFilters,
@@ -23,9 +24,14 @@ export const companyApi = {
   },
 
   employees: {
-    async list(search = '', status = ''): Promise<Paginated<Employee>> {
+    async list(filters: EmployeeFilters = {}): Promise<Paginated<Employee>> {
       const { data } = await httpClient.get<Paginated<Employee>>('/company/employees', {
-        params: { search: search || undefined, status: status || undefined },
+        params: {
+          search: filters.search || undefined,
+          status: filters.status || undefined,
+          state_id: filters.stateId ?? undefined,
+          city_id: filters.cityId ?? undefined,
+        },
       })
       return data
     },

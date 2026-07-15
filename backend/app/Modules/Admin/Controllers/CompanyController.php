@@ -20,6 +20,8 @@ class CompanyController extends Controller
     {
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:120'],
+            'state_id' => ['nullable', 'integer', 'exists:states,id'],
+            'city_id' => ['nullable', 'integer', 'exists:cities,id'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
 
@@ -30,6 +32,11 @@ class CompanyController extends Controller
                     ->orWhere('trade_name', 'like', "%{$search}%")
                     ->orWhere('cnpj', 'like', "%{$search}%");
             }))
+            ->when($validated['city_id'] ?? null, fn ($q, $cityId) => $q->where('city_id', $cityId))
+            ->when(
+                $validated['state_id'] ?? null,
+                fn ($q, $stateId) => $q->whereHas('city', fn ($q) => $q->where('state_id', $stateId)),
+            )
             ->orderBy('legal_name')
             ->paginate($validated['per_page'] ?? 15);
 

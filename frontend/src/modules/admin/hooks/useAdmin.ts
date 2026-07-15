@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { adminApi } from '@/modules/admin/api/admin.api'
 import type {
+  AdminListFilters,
   CreateCompanyPayload,
   CreateEstablishmentPayload,
   UpdateCompanyPayload,
@@ -21,10 +22,10 @@ export function useAdminReports() {
   })
 }
 
-export function useAdminCompanies(search: string) {
+export function useAdminCompanies(filters: AdminListFilters) {
   return useQuery({
-    queryKey: ['admin', 'companies', search],
-    queryFn: () => adminApi.companies.list(search),
+    queryKey: ['admin', 'companies', filters],
+    queryFn: () => adminApi.companies.list(filters),
   })
 }
 
@@ -62,10 +63,10 @@ export function useDeleteCompany() {
   })
 }
 
-export function useAdminEstablishments(search: string) {
+export function useAdminEstablishments(filters: AdminListFilters) {
   return useQuery({
-    queryKey: ['admin', 'establishments', search],
-    queryFn: () => adminApi.establishments.list(search),
+    queryKey: ['admin', 'establishments', filters],
+    queryFn: () => adminApi.establishments.list(filters),
   })
 }
 

@@ -24,16 +24,23 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:120'],
             'status' => ['nullable', 'in:active,cancelled'],
+            'state_id' => ['nullable', 'integer', 'exists:states,id'],
+            'city_id' => ['nullable', 'integer', 'exists:cities,id'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
 
         $employees = $this->company($request)->employees()
-            ->with('user:id,email')
+            ->with(['user:id,email', 'city.state'])
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%{$search}%")
                     ->orWhere('cpf', 'like', "%{$search}%");
             }))
             ->when($validated['status'] ?? null, fn ($q, $status) => $q->where('benefit_status', $status))
+            ->when($validated['city_id'] ?? null, fn ($q, $cityId) => $q->where('city_id', $cityId))
+            ->when(
+                $validated['state_id'] ?? null,
+                fn ($q, $stateId) => $q->whereHas('city', fn ($q) => $q->where('state_id', $stateId)),
+            )
             ->orderBy('full_name')
             ->paginate($validated['per_page'] ?? 15);
 
@@ -44,12 +51,12 @@ class EmployeeController extends Controller
     {
         $employee = $this->employees->create($this->company($request), $request->validated());
 
-        return new EmployeeResource($employee->load('user:id,email'));
+        return new EmployeeResource($employee->load(['user:id,email', 'city.state']));
     }
 
     public function show(Request $request, int $employee): EmployeeResource
     {
-        return new EmployeeResource($this->find($request, $employee)->load('user:id,email'));
+        return new EmployeeResource($this->find($request, $employee)->load(['user:id,email', 'city.state']));
     }
 
     public function update(UpdateEmployeeRequest $request, int $employee): EmployeeResource
@@ -57,7 +64,7 @@ class EmployeeController extends Controller
         $model = $this->find($request, $employee);
         $this->employees->update($model, $request->validated());
 
-        return new EmployeeResource($model->load('user:id,email'));
+        return new EmployeeResource($model->load(['user:id,email', 'city.state']));
     }
 
     public function destroy(Request $request, int $employee): Response
@@ -74,7 +81,7 @@ class EmployeeController extends Controller
             EmployeeStatus::Cancelled,
         );
 
-        return new EmployeeResource($model->load('user:id,email'));
+        return new EmployeeResource($model->load(['user:id,email', 'city.state']));
     }
 
     public function reactivateBenefit(Request $request, int $employee): EmployeeResource
@@ -84,7 +91,7 @@ class EmployeeController extends Controller
             EmployeeStatus::Active,
         );
 
-        return new EmployeeResource($model->load('user:id,email'));
+        return new EmployeeResource($model->load(['user:id,email', 'city.state']));
     }
 
     public function uploadPhoto(UploadEmployeePhotoRequest $request, int $employee): EmployeeResource
@@ -94,7 +101,7 @@ class EmployeeController extends Controller
             $request->file('photo'),
         );
 
-        return new EmployeeResource($model->load('user:id,email'));
+        return new EmployeeResource($model->load(['user:id,email', 'city.state']));
     }
 
     /**

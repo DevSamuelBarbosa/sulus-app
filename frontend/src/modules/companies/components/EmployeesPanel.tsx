@@ -22,6 +22,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { RowActionsMenu } from '@/shared/components/RowActionsMenu'
+import { LocationFilter } from '@/modules/discovery/components/LocationFilter'
 import {
   useDeleteEmployee,
   useEmployees,
@@ -33,7 +35,9 @@ import type { Employee } from '@/modules/companies/types'
 export function EmployeesPanel() {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
-  const { data, isLoading } = useEmployees(search, status)
+  const [stateId, setStateId] = useState<number | null>(null)
+  const [cityId, setCityId] = useState<number | null>(null)
+  const { data, isLoading } = useEmployees({ search, status, stateId, cityId })
   const deleteEmployee = useDeleteEmployee()
   const setBenefit = useSetBenefitStatus()
   const [formOpen, setFormOpen] = useState(false)
@@ -53,12 +57,12 @@ export function EmployeesPanel() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Input
             placeholder="Buscar por nome ou CPF…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="max-w-xs"
+            className="w-64"
           />
           <Select value={status || 'all'} onValueChange={(v) => setStatus(v === 'all' ? '' : v)}>
             <SelectTrigger className="w-40">
@@ -70,6 +74,14 @@ export function EmployeesPanel() {
               <SelectItem value="cancelled">Cancelados</SelectItem>
             </SelectContent>
           </Select>
+          <LocationFilter
+            stateId={stateId}
+            cityId={cityId}
+            onChange={(next) => {
+              setStateId(next.stateId)
+              setCityId(next.cityId)
+            }}
+          />
         </div>
         <Button onClick={openCreate}>Novo funcionário</Button>
       </div>
@@ -80,6 +92,7 @@ export function EmployeesPanel() {
             <TableRow>
               <TableHead>Funcionário</TableHead>
               <TableHead>CPF</TableHead>
+              <TableHead>Cidade</TableHead>
               <TableHead>Benefício</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -87,14 +100,14 @@ export function EmployeesPanel() {
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
                   Carregando…
                 </TableCell>
               </TableRow>
             )}
             {!isLoading && data?.data.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
                   Nenhum funcionário encontrado.
                 </TableCell>
               </TableRow>
@@ -118,28 +131,25 @@ export function EmployeesPanel() {
                     </div>
                   </TableCell>
                   <TableCell>{employee.cpf}</TableCell>
+                  <TableCell>{employee.city ? `${employee.city.name}/${employee.city.uf}` : '—'}</TableCell>
                   <TableCell>
                     <Badge variant={cancelled ? 'outline' : 'secondary'}>
                       {employee.benefit_status_label}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={setBenefit.isPending}
-                      onClick={() =>
-                        void setBenefit.mutateAsync({ id: employee.id, cancel: !cancelled })
-                      }
-                    >
-                      {cancelled ? 'Reativar' : 'Cancelar'}
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => openEdit(employee)}>
-                      Editar
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setDeleting(employee)}>
-                      Excluir
-                    </Button>
+                    <RowActionsMenu
+                      actions={[
+                        {
+                          label: cancelled ? 'Reativar' : 'Cancelar',
+                          disabled: setBenefit.isPending,
+                          onClick: () =>
+                            void setBenefit.mutateAsync({ id: employee.id, cancel: !cancelled }),
+                        },
+                        { label: 'Editar', onClick: () => openEdit(employee) },
+                        { label: 'Excluir', variant: 'destructive', onClick: () => setDeleting(employee) },
+                      ]}
+                    />
                   </TableCell>
                 </TableRow>
               )

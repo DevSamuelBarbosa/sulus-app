@@ -1,16 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { localizationApi } from '@/modules/localization/api/localization.api'
-import { useCities, useCity, useStates } from '@/modules/localization/hooks/useLocalization'
+import { useStates } from '@/modules/localization/hooks/useLocalization'
 import type { AddressValue } from '@/modules/localization/types'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { StateSelect } from '@/shared/components/StateSelect'
+import { CityCombobox } from '@/shared/components/CityCombobox'
 
 interface AddressFormProps {
   value: AddressValue
@@ -39,21 +34,7 @@ function formatCep(cep: string): string {
  */
 export function AddressForm({ value, onChange }: AddressFormProps) {
   const { data: states = [] } = useStates()
-  const [citySearch, setCitySearch] = useState('')
   const [cepStatus, setCepStatus] = useState<'idle' | 'loading' | 'error'>('idle')
-
-  const { data: cities = [] } = useCities(value.state_id, citySearch)
-  // The saved/resolved city may fall outside the current search page, so it
-  // is fetched directly by id and merged into the options below — otherwise
-  // the dropdown would show blank for an already-selected city on load.
-  const { data: selectedCity } = useCity(value.city_id)
-
-  const cityOptions = useMemo(() => {
-    if (selectedCity && !cities.some((c) => c.id === selectedCity.id)) {
-      return [selectedCity, ...cities]
-    }
-    return cities
-  }, [cities, selectedCity])
 
   const patch = (partial: Partial<AddressValue>) => onChange({ ...value, ...partial })
 
@@ -76,11 +57,6 @@ export function AddressForm({ value, onChange }: AddressFormProps) {
       const matches = await localizationApi.getCities({ stateId: state.id, search: result.localidade })
       cityId = matches.find((c) => c.ibge_code === result.ibge)?.id ?? null
     }
-
-    // Keep the city filter in sync so the resolved city shows up as an
-    // option in the dropdown (it queries by this term), instead of relying
-    // on the default unfiltered/alphabetical page that may not include it.
-    setCitySearch(result.localidade)
 
     setCepStatus('idle')
     onChange({
@@ -154,47 +130,24 @@ export function AddressForm({ value, onChange }: AddressFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="state">Estado</Label>
-          <Select
-            value={value.state_id ? String(value.state_id) : ''}
-            onValueChange={(v) => patch({ state_id: v ? Number(v) : null, city_id: null })}
-          >
-            <SelectTrigger id="state" className="w-full">
-              <SelectValue placeholder="Selecione…" />
-            </SelectTrigger>
-            <SelectContent>
-              {states.map((state) => (
-                <SelectItem key={state.id} value={String(state.id)}>
-                  {state.name} ({state.uf})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <StateSelect
+            id="state"
+            value={value.state_id}
+            onChange={(stateId) => patch({ state_id: stateId, city_id: null })}
+            placeholder="Selecione…"
+            className="w-full"
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="city">Cidade</Label>
-          <Input
-            placeholder="Filtrar cidade…"
-            value={citySearch}
-            disabled={value.state_id === null}
-            onChange={(e) => setCitySearch(e.target.value)}
+          <CityCombobox
+            id="city"
+            stateId={value.state_id}
+            value={value.city_id}
+            onChange={(cityId) => patch({ city_id: cityId })}
+            placeholder="Selecione…"
           />
-          <Select
-            value={value.city_id ? String(value.city_id) : ''}
-            disabled={value.state_id === null}
-            onValueChange={(v) => patch({ city_id: v ? Number(v) : null })}
-          >
-            <SelectTrigger id="city" className="w-full">
-              <SelectValue placeholder="Selecione…" />
-            </SelectTrigger>
-            <SelectContent>
-              {cityOptions.map((city) => (
-                <SelectItem key={city.id} value={String(city.id)}>
-                  {city.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
     </div>

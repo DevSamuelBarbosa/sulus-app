@@ -3,6 +3,7 @@ import type { Paginated } from '@/shared/types'
 import type {
   AdminCompany,
   AdminEstablishment,
+  AdminListFilters,
   AdminReport,
   AdminStats,
   CreateCompanyPayload,
@@ -23,9 +24,13 @@ export const adminApi = {
   },
 
   companies: {
-    async list(search = ''): Promise<Paginated<AdminCompany>> {
+    async list(filters: AdminListFilters = {}): Promise<Paginated<AdminCompany>> {
       const { data } = await httpClient.get<Paginated<AdminCompany>>('/admin/companies', {
-        params: { search: search || undefined },
+        params: {
+          search: filters.search || undefined,
+          state_id: filters.stateId ?? undefined,
+          city_id: filters.cityId ?? undefined,
+        },
       })
       return data
     },
@@ -43,9 +48,13 @@ export const adminApi = {
   },
 
   establishments: {
-    async list(search = ''): Promise<Paginated<AdminEstablishment>> {
+    async list(filters: AdminListFilters = {}): Promise<Paginated<AdminEstablishment>> {
       const { data } = await httpClient.get<Paginated<AdminEstablishment>>('/admin/establishments', {
-        params: { search: search || undefined },
+        params: {
+          search: filters.search || undefined,
+          state_id: filters.stateId ?? undefined,
+          city_id: filters.cityId ?? undefined,
+        },
       })
       return data
     },

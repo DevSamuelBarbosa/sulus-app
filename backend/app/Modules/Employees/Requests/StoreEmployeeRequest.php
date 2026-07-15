@@ -26,6 +26,7 @@ class StoreEmployeeRequest extends FormRequest
             'cpf' => ['required', 'digits:11', 'unique:employees,cpf'],
             'phone' => ['nullable', 'string', 'max:30'],
             'hired_at' => ['nullable', 'date'],
+            'city_id' => ['nullable', 'integer', 'exists:cities,id'],
         ];
     }
 }

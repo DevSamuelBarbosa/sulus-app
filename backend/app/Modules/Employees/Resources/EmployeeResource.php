@@ -24,6 +24,13 @@ class EmployeeResource extends JsonResource
             'cpf' => $this->cpf,
             'phone' => $this->phone,
             'photo_url' => $this->photoUrl(),
+            'city_id' => $this->city_id,
+            'city' => $this->whenLoaded('city', fn () => $this->city ? [
+                'id' => $this->city->id,
+                'name' => $this->city->name,
+                'uf' => $this->city->state->uf,
+                'state_id' => $this->city->state_id,
+            ] : null),
             'benefit_status' => $this->benefit_status->value,
             'benefit_status_label' => $this->benefit_status->label(),
             'hired_at' => $this->hired_at?->toDateString(),

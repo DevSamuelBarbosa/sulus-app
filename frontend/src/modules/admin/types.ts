@@ -5,6 +5,12 @@ export interface AdminCity {
   state_id: number
 }
 
+export interface AdminListFilters {
+  search?: string
+  stateId?: number | null
+  cityId?: number | null
+}
+
 export interface AdminCompany {
   id: number
   user_id: number

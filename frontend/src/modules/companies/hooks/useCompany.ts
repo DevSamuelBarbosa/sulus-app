@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { companyApi } from '@/modules/companies/api/company.api'
 import type {
   CreateEmployeePayload,
+  EmployeeFilters,
   UpdateCompanyProfilePayload,
   UpdateEmployeePayload,
   UsageFilters,
@@ -24,10 +25,10 @@ export function useUpdateCompanyProfile() {
   })
 }
 
-export function useEmployees(search: string, status: string) {
+export function useEmployees(filters: EmployeeFilters) {
   return useQuery({
-    queryKey: ['company', 'employees', search, status],
-    queryFn: () => companyApi.employees.list(search, status),
+    queryKey: ['company', 'employees', filters],
+    queryFn: () => companyApi.employees.list(filters),
   })
 }
 

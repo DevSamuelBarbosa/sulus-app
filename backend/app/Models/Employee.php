@@ -17,6 +17,7 @@ class Employee extends Model
     protected $fillable = [
         'user_id',
         'company_id',
+        'city_id',
         'full_name',
         'cpf',
         'photo_path',
@@ -41,6 +42,11 @@ class Employee extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
     }
 
     public function benefitUsages(): HasMany

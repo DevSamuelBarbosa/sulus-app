@@ -15,6 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { RowActionsMenu } from '@/shared/components/RowActionsMenu'
+import { LocationFilter } from '@/modules/discovery/components/LocationFilter'
 import {
   useAdminEstablishments,
   useDeleteEstablishment,
@@ -25,7 +27,9 @@ import type { AdminEstablishment } from '@/modules/admin/types'
 
 export function EstablishmentsPanel() {
   const [search, setSearch] = useState('')
-  const { data, isLoading } = useAdminEstablishments(search)
+  const [stateId, setStateId] = useState<number | null>(null)
+  const [cityId, setCityId] = useState<number | null>(null)
+  const { data, isLoading } = useAdminEstablishments({ search, stateId, cityId })
   const deleteEstablishment = useDeleteEstablishment()
   const updateEstablishment = useUpdateEstablishment()
   const { impersonate } = useAuth()
@@ -52,12 +56,22 @@ export function EstablishmentsPanel() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Input
-          placeholder="Buscar por nome ou CNPJ…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
-        />
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <Input
+            placeholder="Buscar por nome ou CNPJ…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-64"
+          />
+          <LocationFilter
+            stateId={stateId}
+            cityId={cityId}
+            onChange={(next) => {
+              setStateId(next.stateId)
+              setCityId(next.cityId)
+            }}
+          />
+        </div>
         <Button onClick={openCreate}>Novo estabelecimento</Button>
       </div>
 
@@ -105,28 +119,26 @@ export function EstablishmentsPanel() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={updateEstablishment.isPending}
-                    onClick={() =>
-                      void updateEstablishment.mutateAsync({
-                        id: establishment.id,
-                        payload: { is_active: !establishment.is_active },
-                      })
-                    }
-                  >
-                    {establishment.is_active ? 'Desativar' : 'Ativar'}
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => openEdit(establishment)}>
-                    Editar
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => void handleImpersonate(establishment)}>
-                    Impersonar
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setDeleting(establishment)}>
-                    Excluir
-                  </Button>
+                  <RowActionsMenu
+                    actions={[
+                      {
+                        label: establishment.is_active ? 'Desativar' : 'Ativar',
+                        disabled: updateEstablishment.isPending,
+                        onClick: () =>
+                          void updateEstablishment.mutateAsync({
+                            id: establishment.id,
+                            payload: { is_active: !establishment.is_active },
+                          }),
+                      },
+                      { label: 'Editar', onClick: () => openEdit(establishment) },
+                      { label: 'Impersonar', onClick: () => void handleImpersonate(establishment) },
+                      {
+                        label: 'Excluir',
+                        variant: 'destructive',
+                        onClick: () => setDeleting(establishment),
+                      },
+                    ]}
+                  />
                 </TableCell>
               </TableRow>
             ))}

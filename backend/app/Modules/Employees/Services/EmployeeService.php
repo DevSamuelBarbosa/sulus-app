@@ -35,6 +35,7 @@ class EmployeeService
                 'cpf' => $data['cpf'],
                 'phone' => $data['phone'] ?? null,
                 'hired_at' => $data['hired_at'] ?? null,
+                'city_id' => $data['city_id'] ?? null,
                 'benefit_status' => EmployeeStatus::Active,
             ]);
         });
@@ -46,7 +47,7 @@ class EmployeeService
     public function update(Employee $employee, array $data): Employee
     {
         $employee->update(collect($data)
-            ->only(['full_name', 'cpf', 'phone', 'hired_at'])
+            ->only(['full_name', 'cpf', 'phone', 'hired_at', 'city_id'])
             ->all());
 
         // Keep the login user's display name in sync with the profile.
