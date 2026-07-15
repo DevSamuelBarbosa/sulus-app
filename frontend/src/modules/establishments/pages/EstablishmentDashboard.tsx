@@ -34,7 +34,7 @@ export function EstablishmentDashboard() {
           <CardHeader>
             <CardTitle>Empresas parceiras</CardTitle>
             <CardDescription>
-              Veja quais empresas têm funcionários que podem usar o benefício aqui.
+              Veja quais empresas têm clientes que podem usar o benefício aqui.
             </CardDescription>
           </CardHeader>
           <CardContent>

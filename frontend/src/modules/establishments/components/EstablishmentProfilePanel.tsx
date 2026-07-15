@@ -145,7 +145,7 @@ function EstablishmentProfileForm({ profile }: { profile: EstablishmentProfile }
               id="description"
               value={form.description}
               onChange={(e) => patch({ description: e.target.value })}
-              placeholder="Conte para os funcionários o que encontram aqui — isso aparece na busca."
+              placeholder="Conte para os clientes o que encontram aqui — isso aparece na busca."
             />
           </div>
 

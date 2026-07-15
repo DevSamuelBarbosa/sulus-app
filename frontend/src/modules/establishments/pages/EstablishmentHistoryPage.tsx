@@ -30,7 +30,7 @@ export function EstablishmentHistoryPage() {
 
       <div className="flex flex-wrap items-center gap-2">
         <Input
-          placeholder="Buscar por funcionário ou empresa…"
+          placeholder="Buscar por cliente ou empresa…"
           value={search}
           onChange={(e) => {
             setSearch(e.target.value)
@@ -44,7 +44,7 @@ export function EstablishmentHistoryPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Funcionário</TableHead>
+              <TableHead>Cliente</TableHead>
               <TableHead>Empresa</TableHead>
               <TableHead className="text-right">Data</TableHead>
             </TableRow>

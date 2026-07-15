@@ -25,7 +25,7 @@ export function CompaniesDiscoveryPage() {
       <div>
         <h2 className="text-2xl font-semibold text-foreground">Empresas parceiras</h2>
         <p className="text-muted-foreground">
-          Empresas cujos funcionários podem usar o benefício aqui.
+          Empresas cujos clientes podem usar o benefício aqui.
         </p>
       </div>
 

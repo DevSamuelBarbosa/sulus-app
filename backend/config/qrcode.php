@@ -14,7 +14,7 @@ return [
     */
 
     // Lifetime of a generated QR token, in seconds.
-    'ttl' => (int) env('QRCODE_TTL', 60),
+    'ttl' => (int) env('QRCODE_TTL', 180),
 
     // Length of the opaque random token.
     'token_length' => (int) env('QRCODE_TOKEN_LENGTH', 40),
