@@ -54,13 +54,13 @@ function CommandList({
 
     // When this popover is portaled outside a modal Dialog's own DOM
     // subtree, Radix's scroll-lock (react-remove-scroll) treats it as
-    // "outside" content and swallows wheel events on it entirely — the
+    // "outside" content and swallows wheel/touch events on it entirely — the
     // container is still natively scrollable (verified: assigning scrollTop
     // directly works), so drive the scroll manually here instead of relying
-    // on native wheel-scroll, which the lock may block.
+    // on native wheel/touch scroll, which the lock may block.
     //
-    // React's synthetic onWheel can't reliably preventDefault (it's
-    // registered passively at the root), so a real listener is needed here
+    // React's synthetic onWheel/onTouchMove can't reliably preventDefault
+    // (registered passively at the root), so real listeners are needed here
     // to stop native scroll and avoid double-scrolling where it isn't
     // blocked (e.g. outside any Dialog).
     function handleWheel(event: WheelEvent) {
@@ -68,8 +68,25 @@ function CommandList({
       el!.scrollTop += event.deltaY
     }
 
+    let touchY = 0
+    function handleTouchStart(event: TouchEvent) {
+      touchY = event.touches[0].clientY
+    }
+    function handleTouchMove(event: TouchEvent) {
+      const nextY = event.touches[0].clientY
+      event.preventDefault()
+      el!.scrollTop += touchY - nextY
+      touchY = nextY
+    }
+
     el.addEventListener("wheel", handleWheel, { passive: false })
-    return () => el.removeEventListener("wheel", handleWheel)
+    el.addEventListener("touchstart", handleTouchStart, { passive: true })
+    el.addEventListener("touchmove", handleTouchMove, { passive: false })
+    return () => {
+      el.removeEventListener("wheel", handleWheel)
+      el.removeEventListener("touchstart", handleTouchStart)
+      el.removeEventListener("touchmove", handleTouchMove)
+    }
   }, [])
 
   return (

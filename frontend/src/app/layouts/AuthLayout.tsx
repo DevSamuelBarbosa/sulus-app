@@ -16,9 +16,11 @@ import { LogoWordmark } from '@/shared/components/Logo'
 export function AuthLayout() {
   return (
     <div className="dark flex min-h-svh bg-tertiary text-tertiary-foreground">
-      <div className="flex w-full flex-col justify-center px-6 py-12 sm:px-12 lg:w-110 lg:shrink-0 xl:w-120">
+      <div className="flex w-full flex-col justify-center bg-tertiary px-6 py-12 sm:px-12 lg:w-110 lg:shrink-0 lg:bg-none xl:w-120">
         <div className="mx-auto flex w-full max-w-sm flex-col gap-8">
-          <LogoWordmark onDark />
+          <div className="flex justify-center lg:justify-start">
+            <LogoWordmark onDark />
+          </div>
           <Outlet />
         </div>
       </div>

@@ -36,7 +36,7 @@ export function LoginPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
+      <div className="text-center lg:text-left">
         <h1 className="text-2xl font-semibold">Entrar no painel</h1>
         <p className="text-sm text-muted-foreground">Use sua conta para acessar a plataforma.</p>
       </div>
