@@ -149,7 +149,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="email">E-mail de login</Label>
                   <Input
@@ -191,7 +191,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="trade_name">Nome fantasia</Label>
               <Input
@@ -214,7 +214,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="phone">Telefone</Label>
               <Input

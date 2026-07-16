@@ -18,7 +18,7 @@ export function RowActionsMenu({ actions }: { actions: RowAction[] }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label="Ações">
+        <Button variant="ghost" size="icon" aria-label="Ações">
           <MoreVertical />
         </Button>
       </DropdownMenuTrigger>

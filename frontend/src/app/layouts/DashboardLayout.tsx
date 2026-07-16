@@ -30,9 +30,9 @@ export function DashboardLayout() {
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 data-vertical:h-4 data-vertical:self-auto" />
-          <h1 className="text-sm font-medium">{title}</h1>
+          <h1 className="truncate text-sm font-medium">{title}</h1>
         </header>
-        <div className="flex-1 p-4 md:p-6">
+        <div className="min-w-0 flex-1 p-4 md:p-6">
           <Outlet />
         </div>
       </SidebarInset>
