@@ -62,7 +62,7 @@ class AuthTest extends TestCase
         $company = Company::factory()->create(['is_active' => false]);
 
         $this->postJson('/api/auth/login', [
-            'email' => $company->user->email,
+            'email' => $company->masterUser->email,
             'password' => 'password',
         ])->assertForbidden()->assertJsonPath('code', 'account_inactive');
     }
@@ -72,7 +72,7 @@ class AuthTest extends TestCase
         $establishment = Establishment::factory()->create(['is_active' => false]);
 
         $this->postJson('/api/auth/login', [
-            'email' => $establishment->user->email,
+            'email' => $establishment->masterUser->email,
             'password' => 'password',
         ])->assertForbidden()->assertJsonPath('code', 'account_inactive');
     }
@@ -82,7 +82,7 @@ class AuthTest extends TestCase
         $company = Company::factory()->create(['is_active' => true]);
 
         $this->postJson('/api/auth/login', [
-            'email' => $company->user->email,
+            'email' => $company->masterUser->email,
             'password' => 'password',
         ])->assertOk();
     }

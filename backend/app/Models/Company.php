@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\TenantRole;
 use App\Models\Concerns\HasAddress;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
@@ -15,7 +16,6 @@ class Company extends Model
     use HasAddress, HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'user_id',
         'legal_name',
         'trade_name',
         'cnpj',
@@ -42,9 +42,18 @@ class Company extends Model
         ];
     }
 
-    public function user(): BelongsTo
+    public function users(): HasMany
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(User::class);
+    }
+
+    /**
+     * The tenant's single owner login (see App\Enums\TenantRole) — a
+     * convenience for admin listings, not a substitute for users().
+     */
+    public function masterUser(): HasOne
+    {
+        return $this->hasOne(User::class)->where('tenant_role', TenantRole::Master);
     }
 
     public function employees(): HasMany

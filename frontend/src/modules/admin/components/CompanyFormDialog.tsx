@@ -60,9 +60,6 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
   const createCompany = useCreateCompany()
   const updateCompany = useUpdateCompany()
   const [profile, setProfile] = useState({
-    user_name: '',
-    email: company?.login_email ?? '',
-    password: '',
     legal_name: company?.legal_name ?? '',
     trade_name: company?.trade_name ?? '',
     cnpj: company?.cnpj ?? '',
@@ -104,9 +101,6 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
         })
       } else {
         await createCompany.mutateAsync({
-          user_name: profile.user_name,
-          email: profile.email,
-          password: profile.password,
           legal_name: profile.legal_name,
           trade_name: profile.trade_name || null,
           cnpj: profile.cnpj,
@@ -131,54 +125,11 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
         <DialogDescription>
           {isEdit
             ? 'Atualize os dados cadastrais da empresa.'
-            : 'Cria o usuário de login e o perfil da empresa.'}
+            : 'Cria o perfil da empresa. Os logins são criados depois, na tela de Usuários.'}
         </DialogDescription>
       </DialogHeader>
 
       <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-        {!isEdit && (
-          <>
-            <FormSection title="Acesso" description="Credenciais de login do responsável pela empresa.">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="user_name">Nome do responsável (login)</Label>
-                <Input
-                  id="user_name"
-                  value={profile.user_name}
-                  onChange={(e) => patch({ user_name: e.target.value })}
-                  placeholder="Nome do responsável"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="email">E-mail de login</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={profile.email}
-                    onChange={(e) => patch({ email: e.target.value })}
-                    placeholder="email@empresa.com"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={profile.password}
-                    onChange={(e) => patch({ password: e.target.value })}
-                    placeholder="Mínimo 8 caracteres"
-                    minLength={8}
-                    required
-                  />
-                </div>
-              </div>
-            </FormSection>
-            <Separator />
-          </>
-        )}
-
         <FormSection title="Dados da empresa">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="legal_name">Razão social</Label>

@@ -1,3 +1,5 @@
+import type { TenantMaster } from '@/shared/types/tenant'
+
 export interface EstablishmentCity {
   id: number
   name: string
@@ -7,8 +9,7 @@ export interface EstablishmentCity {
 
 export interface EstablishmentProfile {
   id: number
-  user_id: number
-  login_email: string
+  master: TenantMaster | null
   name: string
   cnpj: string
   category_id: number | null
@@ -37,6 +38,13 @@ export interface UpdateEstablishmentProfilePayload {
   complemento?: string | null
   bairro?: string | null
   city_id?: number | null
+}
+
+/** Master-only, password-confirmed edit of CNPJ/active status — see UpdateEstablishmentSettingsRequest (backend). */
+export interface UpdateEstablishmentSettingsPayload {
+  cnpj?: string
+  is_active?: boolean
+  password: string
 }
 
 export interface EstablishmentReport {

@@ -22,7 +22,7 @@ class ReportsTest extends TestCase
             'employee_id' => $employee->id,
             'company_id' => $employee->company_id,
             'establishment_id' => $establishment->id,
-            'validated_by_user_id' => $establishment->user_id,
+            'validated_by_user_id' => $establishment->masterUser->id,
             'used_at' => $usedAt ?? now(),
             'employee_name_snapshot' => $employee->full_name,
             'company_name_snapshot' => $employee->company->trade_name ?? $employee->company->legal_name,
@@ -65,7 +65,7 @@ class ReportsTest extends TestCase
         $this->makeUsage($employeeA, $establishment);
         $this->makeUsage($employeeB, $establishment);
 
-        Sanctum::actingAs($companyA->user);
+        Sanctum::actingAs($companyA->masterUser);
 
         $this->getJson('/api/company/usages')
             ->assertOk()
@@ -83,7 +83,7 @@ class ReportsTest extends TestCase
         $this->makeUsage($maria, $establishment);
         $this->makeUsage($joao, $establishment);
 
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->getJson('/api/company/usages?search=Maria')
             ->assertOk()
@@ -108,7 +108,7 @@ class ReportsTest extends TestCase
         $this->makeUsage($active, $establishment);
         $this->makeUsage($active, $establishment);
 
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->getJson('/api/company/reports')
             ->assertOk()
@@ -130,7 +130,7 @@ class ReportsTest extends TestCase
         $this->makeUsage($employee, $establishmentA);
         $this->makeUsage($employee, $establishmentB);
 
-        Sanctum::actingAs($establishmentA->user);
+        Sanctum::actingAs($establishmentA->masterUser);
 
         $this->getJson('/api/establishment/usages')
             ->assertOk()
@@ -146,7 +146,7 @@ class ReportsTest extends TestCase
         $this->makeUsage($employee, $establishment);
         $this->makeUsage($employee, $establishment);
 
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->getJson('/api/establishment/reports')
             ->assertOk()
@@ -160,7 +160,7 @@ class ReportsTest extends TestCase
 
     public function test_non_admin_cannot_access_admin_reports(): void
     {
-        Sanctum::actingAs(Company::factory()->create()->user);
+        Sanctum::actingAs(Company::factory()->create()->masterUser);
 
         $this->getJson('/api/admin/reports')->assertForbidden();
     }

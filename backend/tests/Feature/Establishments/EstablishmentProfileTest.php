@@ -27,19 +27,19 @@ class EstablishmentProfileTest extends TestCase
     public function test_establishment_can_fetch_its_own_profile(): void
     {
         $establishment = Establishment::factory()->create(['name' => 'Restaurante Acme']);
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->getJson('/api/establishment/profile')
             ->assertOk()
             ->assertJsonPath('data.id', $establishment->id)
             ->assertJsonPath('data.name', 'Restaurante Acme')
-            ->assertJsonPath('data.login_email', $establishment->user->email);
+            ->assertJsonPath('data.master.email', $establishment->masterUser->email);
     }
 
     public function test_establishment_can_update_its_own_profile(): void
     {
         $establishment = Establishment::factory()->create();
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->putJson('/api/establishment/profile', [
             'description' => 'O melhor restaurante da cidade',
@@ -55,7 +55,7 @@ class EstablishmentProfileTest extends TestCase
     public function test_establishment_cannot_change_is_active_or_cnpj_via_profile(): void
     {
         $establishment = Establishment::factory()->create(['is_active' => true, 'cnpj' => '11111111000111']);
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->putJson('/api/establishment/profile', [
             'is_active' => false,

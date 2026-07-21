@@ -1,5 +1,6 @@
 import { httpClient } from '@/shared/api/httpClient'
 import type { BenefitUsage, Paginated } from '@/shared/types'
+import type { CreateTenantUserPayload, TenantUser, UpdateTenantUserPayload } from '@/shared/types/tenant'
 import type {
   CompanyProfile,
   CompanyReport,
@@ -7,6 +8,7 @@ import type {
   Employee,
   EmployeeFilters,
   UpdateCompanyProfilePayload,
+  UpdateCompanySettingsPayload,
   UpdateEmployeePayload,
   UsageFilters,
 } from '@/modules/companies/types'
@@ -19,6 +21,38 @@ export const companyApi = {
     },
     async update(payload: UpdateCompanyProfilePayload): Promise<CompanyProfile> {
       const { data } = await httpClient.put<{ data: CompanyProfile }>('/company/profile', payload)
+      return data.data
+    },
+    async updateSettings(payload: UpdateCompanySettingsPayload): Promise<CompanyProfile> {
+      const { data } = await httpClient.patch<{ data: CompanyProfile }>('/company/settings', payload)
+      return data.data
+    },
+    async deleteAccount(password: string): Promise<void> {
+      await httpClient.delete('/company', { data: { password } })
+    },
+  },
+
+  users: {
+    async list(): Promise<TenantUser[]> {
+      const { data } = await httpClient.get<{ data: TenantUser[] }>('/company/users')
+      return data.data
+    },
+    async create(payload: CreateTenantUserPayload): Promise<TenantUser> {
+      const { data } = await httpClient.post<{ data: TenantUser }>('/company/users', payload)
+      return data.data
+    },
+    async update(userId: number, payload: UpdateTenantUserPayload): Promise<TenantUser> {
+      const { data } = await httpClient.put<{ data: TenantUser }>(`/company/users/${userId}`, payload)
+      return data.data
+    },
+    async remove(userId: number): Promise<void> {
+      await httpClient.delete(`/company/users/${userId}`)
+    },
+    async promoteMaster(userId: number, password: string): Promise<TenantUser> {
+      const { data } = await httpClient.patch<{ data: TenantUser }>(
+        `/company/users/${userId}/promote-master`,
+        { password },
+      )
       return data.data
     },
   },

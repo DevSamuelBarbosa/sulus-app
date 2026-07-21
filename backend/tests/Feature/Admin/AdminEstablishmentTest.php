@@ -37,9 +37,6 @@ class AdminEstablishmentTest extends TestCase
         $category = Category::factory()->create(['name' => 'Alimentação']);
 
         $response = $this->postJson('/api/admin/establishments', [
-            'user_name' => 'Restaurante Novo',
-            'email' => 'novo@restaurante.test',
-            'password' => 'password123',
             'name' => 'Restaurante Novo',
             'cnpj' => '98765432000111',
             'category_id' => $category->id,
@@ -47,11 +44,33 @@ class AdminEstablishmentTest extends TestCase
 
         $response->assertCreated()
             ->assertJsonPath('data.name', 'Restaurante Novo')
-            ->assertJsonPath('data.login_email', 'novo@restaurante.test')
-            ->assertJsonPath('data.category.name', 'Alimentação');
+            ->assertJsonPath('data.category.name', 'Alimentação')
+            ->assertJsonPath('data.master', null);
 
-        $this->assertDatabaseHas('users', ['email' => 'novo@restaurante.test', 'role' => 'establishment']);
         $this->assertDatabaseHas('establishments', ['cnpj' => '98765432000111']);
+    }
+
+    public function test_admin_creates_the_first_login_which_becomes_master(): void
+    {
+        Sanctum::actingAs(User::factory()->admin()->create());
+        $establishment = Establishment::factory()->create();
+        $establishment->users()->delete();
+
+        $response = $this->postJson("/api/admin/establishments/{$establishment->id}/users", [
+            'name' => 'Dono do Estabelecimento',
+            'email' => 'dono@restaurante.test',
+            'password' => 'password123',
+            'tenant_role' => 'normal',
+        ]);
+
+        $response->assertCreated()->assertJsonPath('data.tenant_role', 'master');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'dono@restaurante.test',
+            'role' => 'establishment',
+            'establishment_id' => $establishment->id,
+            'tenant_role' => 'master',
+        ]);
     }
 
     public function test_admin_can_update_an_establishment(): void

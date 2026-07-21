@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TenantRole;
 use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Establishment;
@@ -16,7 +17,6 @@ class EstablishmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory()->role(UserRole::Establishment),
             'category_id' => Category::factory(),
             'name' => fake()->company(),
             'cnpj' => fake()->unique()->numerify('##############'),
@@ -25,5 +25,19 @@ class EstablishmentFactory extends Factory
             'city_id' => null,
             'is_active' => true,
         ];
+    }
+
+    /**
+     * Every establishment needs at least a Master login to be usable
+     * end-to-end, so factory-created establishments get one by default.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Establishment $establishment) {
+            User::factory()->for($establishment)->create([
+                'role' => UserRole::Establishment,
+                'tenant_role' => TenantRole::Master,
+            ]);
+        });
     }
 }

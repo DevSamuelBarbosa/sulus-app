@@ -3,7 +3,7 @@ import { LogOut, Moon, Sun } from 'lucide-react'
 import { initials } from '@/lib/utils'
 import { useAuth } from '@/modules/auth/AuthContext'
 import { useTheme } from '@/app/theme-provider'
-import { isNavItemActive, navItemsByRole, roleLabels } from '@/app/nav-config'
+import { filterNavItemsByPermission, isNavItemActive, navItemsByRole, roleLabels } from '@/app/nav-config'
 import { LogoMark } from '@/shared/components/Logo'
 import {
   Sidebar,
@@ -37,7 +37,7 @@ export function AppSidebar() {
   }
 
   const roleRoot = `/${user.role}`
-  const items = navItemsByRole[user.role]
+  const items = filterNavItemsByPermission(navItemsByRole[user.role], user.tenant_role)
 
   return (
     <Sidebar collapsible="icon">

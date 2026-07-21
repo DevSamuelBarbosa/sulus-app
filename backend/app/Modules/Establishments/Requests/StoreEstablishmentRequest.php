@@ -17,12 +17,6 @@ class StoreEstablishmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Login user for the establishment.
-            'user_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
-
-            // Establishment profile.
             'name' => ['required', 'string', 'max:255'],
             'cnpj' => ['required', 'digits:14', 'unique:establishments,cnpj'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],

@@ -26,7 +26,7 @@ class EstablishmentController extends Controller
         ]);
 
         $establishments = Establishment::query()
-            ->with(['user:id,email', 'city.state', 'category'])
+            ->with(['masterUser', 'city.state', 'category'])
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('cnpj', 'like', "%{$search}%");
@@ -46,19 +46,19 @@ class EstablishmentController extends Controller
     {
         $establishment = $this->establishments->create($request->validated());
 
-        return new EstablishmentResource($establishment->load(['user:id,email', 'city.state', 'category']));
+        return new EstablishmentResource($establishment->load(['masterUser', 'city.state', 'category']));
     }
 
     public function show(Establishment $establishment): EstablishmentResource
     {
-        return new EstablishmentResource($establishment->load(['user:id,email', 'city.state', 'category']));
+        return new EstablishmentResource($establishment->load(['masterUser', 'city.state', 'category']));
     }
 
     public function update(UpdateEstablishmentRequest $request, Establishment $establishment): EstablishmentResource
     {
         $this->establishments->update($establishment, $request->validated());
 
-        return new EstablishmentResource($establishment->load(['user:id,email', 'city.state', 'category']));
+        return new EstablishmentResource($establishment->load(['masterUser', 'city.state', 'category']));
     }
 
     public function destroy(Establishment $establishment): Response

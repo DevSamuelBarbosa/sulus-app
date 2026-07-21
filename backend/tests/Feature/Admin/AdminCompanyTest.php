@@ -56,9 +56,6 @@ class AdminCompanyTest extends TestCase
         $city = City::create(['ibge_code' => '4311809', 'state_id' => $state->id, 'name' => 'Marau']);
 
         $response = $this->postJson('/api/admin/companies', [
-            'user_name' => 'Empresa Nova',
-            'email' => 'nova@empresa.test',
-            'password' => 'password123',
             'legal_name' => 'Empresa Nova LTDA',
             'trade_name' => 'Empresa Nova',
             'cnpj' => '12345678000199',
@@ -68,26 +65,45 @@ class AdminCompanyTest extends TestCase
 
         $response->assertCreated()
             ->assertJsonPath('data.legal_name', 'Empresa Nova LTDA')
-            ->assertJsonPath('data.login_email', 'nova@empresa.test')
             ->assertJsonPath('data.contact_email', 'contato@empresanova.test')
-            ->assertJsonPath('data.city.name', 'Marau');
+            ->assertJsonPath('data.city.name', 'Marau')
+            ->assertJsonPath('data.master', null);
 
-        $this->assertDatabaseHas('users', ['email' => 'nova@empresa.test', 'role' => 'company']);
         $this->assertDatabaseHas('companies', ['cnpj' => '12345678000199']);
     }
 
-    public function test_creating_a_company_requires_unique_cnpj_and_email(): void
+    public function test_admin_creates_the_first_login_which_becomes_master(): void
     {
         Sanctum::actingAs(User::factory()->admin()->create());
-        $existing = Company::factory()->create(['cnpj' => '11111111000111']);
+        $company = Company::factory()->create();
+        $company->users()->delete();
+
+        $response = $this->postJson("/api/admin/companies/{$company->id}/users", [
+            'name' => 'Dono da Empresa',
+            'email' => 'dono@empresa.test',
+            'password' => 'password123',
+            'tenant_role' => 'normal',
+        ]);
+
+        $response->assertCreated()->assertJsonPath('data.tenant_role', 'master');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'dono@empresa.test',
+            'role' => 'company',
+            'company_id' => $company->id,
+            'tenant_role' => 'master',
+        ]);
+    }
+
+    public function test_creating_a_company_requires_a_unique_cnpj(): void
+    {
+        Sanctum::actingAs(User::factory()->admin()->create());
+        Company::factory()->create(['cnpj' => '11111111000111']);
 
         $this->postJson('/api/admin/companies', [
-            'user_name' => 'Dup',
-            'email' => $existing->user->email,
-            'password' => 'password123',
             'legal_name' => 'Dup LTDA',
             'cnpj' => '11111111000111',
-        ])->assertUnprocessable()->assertJsonValidationErrors(['email', 'cnpj']);
+        ])->assertUnprocessable()->assertJsonValidationErrors(['cnpj']);
     }
 
     public function test_admin_can_update_a_company(): void

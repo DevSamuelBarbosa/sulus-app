@@ -35,7 +35,8 @@ export function CompaniesPanel() {
   const [deleting, setDeleting] = useState<AdminCompany | null>(null)
 
   async function handleImpersonate(company: AdminCompany) {
-    await impersonate(company.user_id)
+    if (!company.master) return
+    await impersonate(company.master.id)
     navigate('/company')
   }
 
@@ -101,7 +102,7 @@ export function CompaniesPanel() {
               <TableRow key={company.id}>
                 <TableCell>
                   <div className="font-medium">{company.trade_name || company.legal_name}</div>
-                  <div className="text-xs text-muted-foreground">{company.login_email}</div>
+                  <div className="text-xs text-muted-foreground">{company.master?.email ?? 'Sem login'}</div>
                 </TableCell>
                 <TableCell>{company.cnpj}</TableCell>
                 <TableCell>{company.city ? `${company.city.name}/${company.city.uf}` : '—'}</TableCell>
@@ -123,7 +124,12 @@ export function CompaniesPanel() {
                           }),
                       },
                       { label: 'Editar', onClick: () => openEdit(company) },
-                      { label: 'Impersonar', onClick: () => void handleImpersonate(company) },
+                      { label: 'Usuários', onClick: () => navigate(`/admin/companies/${company.id}/users`) },
+                      {
+                        label: 'Impersonar',
+                        disabled: !company.master,
+                        onClick: () => void handleImpersonate(company),
+                      },
                       { label: 'Excluir', variant: 'destructive', onClick: () => setDeleting(company) },
                     ]}
                   />

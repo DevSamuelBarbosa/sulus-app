@@ -26,7 +26,7 @@ class CompanyController extends Controller
         ]);
 
         $companies = Company::query()
-            ->with(['user:id,email', 'city.state'])
+            ->with(['masterUser', 'city.state'])
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
                 $q->where('legal_name', 'like', "%{$search}%")
                     ->orWhere('trade_name', 'like', "%{$search}%")
@@ -47,19 +47,19 @@ class CompanyController extends Controller
     {
         $company = $this->companies->create($request->validated());
 
-        return new CompanyResource($company->load(['user:id,email', 'city.state']));
+        return new CompanyResource($company->load(['masterUser', 'city.state']));
     }
 
     public function show(Company $company): CompanyResource
     {
-        return new CompanyResource($company->load(['user:id,email', 'city.state']));
+        return new CompanyResource($company->load(['masterUser', 'city.state']));
     }
 
     public function update(UpdateCompanyRequest $request, Company $company): CompanyResource
     {
         $this->companies->update($company, $request->validated());
 
-        return new CompanyResource($company->load(['user:id,email', 'city.state']));
+        return new CompanyResource($company->load(['masterUser', 'city.state']));
     }
 
     public function destroy(Company $company): Response

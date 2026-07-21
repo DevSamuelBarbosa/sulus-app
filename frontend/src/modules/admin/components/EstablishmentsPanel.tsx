@@ -39,7 +39,8 @@ export function EstablishmentsPanel() {
   const [deleting, setDeleting] = useState<AdminEstablishment | null>(null)
 
   async function handleImpersonate(establishment: AdminEstablishment) {
-    await impersonate(establishment.user_id)
+    if (!establishment.master) return
+    await impersonate(establishment.master.id)
     navigate('/establishment')
   }
 
@@ -106,7 +107,9 @@ export function EstablishmentsPanel() {
               <TableRow key={establishment.id}>
                 <TableCell>
                   <div className="font-medium">{establishment.name}</div>
-                  <div className="text-xs text-muted-foreground">{establishment.login_email}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {establishment.master?.email ?? 'Sem login'}
+                  </div>
                 </TableCell>
                 <TableCell>{establishment.cnpj}</TableCell>
                 <TableCell>{establishment.category?.name ?? '—'}</TableCell>
@@ -131,7 +134,15 @@ export function EstablishmentsPanel() {
                           }),
                       },
                       { label: 'Editar', onClick: () => openEdit(establishment) },
-                      { label: 'Impersonar', onClick: () => void handleImpersonate(establishment) },
+                      {
+                        label: 'Usuários',
+                        onClick: () => navigate(`/admin/establishments/${establishment.id}/users`),
+                      },
+                      {
+                        label: 'Impersonar',
+                        disabled: !establishment.master,
+                        onClick: () => void handleImpersonate(establishment),
+                      },
                       {
                         label: 'Excluir',
                         variant: 'destructive',

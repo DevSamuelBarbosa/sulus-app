@@ -1,5 +1,8 @@
 export type Role = 'admin' | 'company' | 'employee' | 'establishment'
 
+/** Permission level of a company/establishment login — see App\Enums\TenantRole (backend). */
+export type TenantRole = 'master' | 'administrador' | 'normal'
+
 export interface Paginated<T> {
   data: T[]
   meta: {

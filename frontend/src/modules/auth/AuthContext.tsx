@@ -12,6 +12,7 @@ interface AuthContextValue {
   logout: () => Promise<void>
   impersonate: (userId: number) => Promise<AuthUser>
   stopImpersonation: () => Promise<AuthUser>
+  refreshUser: () => Promise<AuthUser>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -63,6 +64,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return adminUser
   }, [])
 
+  /**
+   * Re-fetches /auth/me — needed after an action that changes the current
+   * user's own tenant_role server-side without issuing a new token (e.g.
+   * transferring Master to someone else demotes the acting user).
+   */
+  const refreshUser = useCallback(async () => {
+    const freshUser = await authApi.me()
+    setUser(freshUser)
+    return freshUser
+  }, [])
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -72,8 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       impersonate,
       stopImpersonation,
+      refreshUser,
     }),
-    [user, isLoading, login, logout, impersonate, stopImpersonation],
+    [user, isLoading, login, logout, impersonate, stopImpersonation, refreshUser],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

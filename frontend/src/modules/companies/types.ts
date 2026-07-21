@@ -1,3 +1,5 @@
+import type { TenantMaster } from '@/shared/types/tenant'
+
 export interface CompanyCity {
   id: number
   name: string
@@ -7,8 +9,7 @@ export interface CompanyCity {
 
 export interface CompanyProfile {
   id: number
-  user_id: number
-  login_email: string
+  master: TenantMaster | null
   legal_name: string
   trade_name: string | null
   cnpj: string
@@ -36,6 +37,13 @@ export interface UpdateCompanyProfilePayload {
   complemento?: string | null
   bairro?: string | null
   city_id?: number | null
+}
+
+/** Master-only, password-confirmed edit of CNPJ/active status — see UpdateCompanySettingsRequest (backend). */
+export interface UpdateCompanySettingsPayload {
+  cnpj?: string
+  is_active?: boolean
+  password: string
 }
 
 export type BenefitStatus = 'active' | 'cancelled'

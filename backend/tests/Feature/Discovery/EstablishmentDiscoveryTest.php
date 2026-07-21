@@ -23,7 +23,7 @@ class EstablishmentDiscoveryTest extends TestCase
 
     public function test_establishment_role_cannot_list_establishments(): void
     {
-        Sanctum::actingAs(Establishment::factory()->create()->user);
+        Sanctum::actingAs(Establishment::factory()->create()->masterUser);
 
         $this->getJson('/api/establishments')->assertForbidden();
     }

@@ -1,12 +1,21 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { AddressForm } from '@/modules/localization/components/AddressForm'
 import type { AddressValue } from '@/modules/localization/types'
-import { useCompanyProfile, useUpdateCompanyProfile } from '@/modules/companies/hooks/useCompany'
+import { useAuth } from '@/modules/auth/AuthContext'
+import { MasterPasswordDialog } from '@/shared/components/MasterPasswordDialog'
+import {
+  useCompanyProfile,
+  useDeleteCompanyAccount,
+  useUpdateCompanyProfile,
+  useUpdateCompanySettings,
+} from '@/modules/companies/hooks/useCompany'
 import type { CompanyProfile } from '@/modules/companies/types'
 
 function addressFromProfile(profile: CompanyProfile): AddressValue {
@@ -22,13 +31,19 @@ function addressFromProfile(profile: CompanyProfile): AddressValue {
 }
 
 export function CompanyProfilePanel() {
+  const { user } = useAuth()
   const { data: profile, isLoading } = useCompanyProfile()
 
   if (isLoading || !profile) {
     return <p className="text-muted-foreground">Carregando perfil…</p>
   }
 
-  return <CompanyProfileForm key={profile.id} profile={profile} />
+  return (
+    <div className="flex flex-col gap-6">
+      <CompanyProfileForm key={profile.id} profile={profile} />
+      {user?.tenant_role === 'master' && <CompanySensitiveSettings profile={profile} />}
+    </div>
+  )
 }
 
 function CompanyProfileForm({ profile }: { profile: CompanyProfile }) {
@@ -79,8 +94,8 @@ function CompanyProfileForm({ profile }: { profile: CompanyProfile }) {
               <Input value={profile.cnpj} disabled readOnly />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>E-mail de login</Label>
-              <Input value={profile.login_email} disabled readOnly />
+              <Label>Responsável (Master)</Label>
+              <Input value={profile.master?.email ?? '—'} disabled readOnly />
             </div>
           </div>
 
@@ -147,6 +162,95 @@ function CompanyProfileForm({ profile }: { profile: CompanyProfile }) {
           </div>
         </form>
       </CardContent>
+    </Card>
+  )
+}
+
+/**
+ * Only rendered for the tenant's Master (see CompanyProfilePanel above) —
+ * CNPJ and account deletion always require the password to be redigitated,
+ * even though the user is already logged in (see MasterPasswordDialog).
+ */
+function CompanySensitiveSettings({ profile }: { profile: CompanyProfile }) {
+  const navigate = useNavigate()
+  const { logout } = useAuth()
+  const updateSettings = useUpdateCompanySettings()
+  const deleteAccount = useDeleteCompanyAccount()
+  const [cnpj, setCnpj] = useState(profile.cnpj)
+  const [isActive, setIsActive] = useState(profile.is_active)
+  const [cnpjDialogOpen, setCnpjDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
+  return (
+    <Card className="max-w-2xl border-destructive/30">
+      <CardHeader>
+        <CardTitle>Configurações avançadas</CardTitle>
+        <CardDescription>Exclusivo do Master — cada ação pede sua senha novamente.</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="settings_cnpj">CNPJ</Label>
+              <Input
+                id="settings_cnpj"
+                value={cnpj}
+                onChange={(e) => setCnpj(e.target.value.replace(/\D/g, ''))}
+                maxLength={14}
+              />
+            </div>
+            <div className="flex items-center gap-2 pt-6">
+              <Switch id="settings_is_active" checked={isActive} onCheckedChange={setIsActive} />
+              <Label htmlFor="settings_is_active">Empresa ativa</Label>
+            </div>
+          </div>
+          <div>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setCnpjDialogOpen(true)}
+              disabled={cnpj === profile.cnpj && isActive === profile.is_active}
+            >
+              Salvar configurações
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 border-t border-border pt-4">
+          <p className="text-sm text-muted-foreground">
+            Excluir a conta remove a empresa da plataforma e desativa todos os logins vinculados.
+          </p>
+          <div>
+            <Button type="button" variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
+              Excluir conta
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+
+      <MasterPasswordDialog
+        open={cnpjDialogOpen}
+        onOpenChange={setCnpjDialogOpen}
+        title="Salvar configurações"
+        description="Confirme sua senha para alterar CNPJ/status da empresa."
+        onConfirm={async (password) => {
+          await updateSettings.mutateAsync({ cnpj, is_active: isActive, password })
+        }}
+      />
+
+      <MasterPasswordDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Excluir conta da empresa?"
+        description="Essa ação não pode ser desfeita. Confirme sua senha para excluir."
+        confirmLabel="Excluir conta"
+        destructive
+        onConfirm={async (password) => {
+          await deleteAccount.mutateAsync(password)
+          await logout()
+          navigate('/login', { replace: true })
+        }}
+      />
     </Card>
   )
 }

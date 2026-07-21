@@ -1,3 +1,7 @@
+import type { TenantMaster } from '@/shared/types/tenant'
+
+export type { TenantUser as AdminTenantUser, CreateTenantUserPayload, AdminUpdateTenantUserPayload } from '@/shared/types/tenant'
+
 export interface AdminCity {
   id: number
   name: string
@@ -13,8 +17,7 @@ export interface AdminListFilters {
 
 export interface AdminCompany {
   id: number
-  user_id: number
-  login_email: string
+  master: TenantMaster | null
   legal_name: string
   trade_name: string | null
   cnpj: string
@@ -33,8 +36,7 @@ export interface AdminCompany {
 
 export interface AdminEstablishment {
   id: number
-  user_id: number
-  login_email: string
+  master: TenantMaster | null
   name: string
   cnpj: string
   category_id: number | null
@@ -77,9 +79,6 @@ interface AddressFields {
 }
 
 export interface CreateCompanyPayload extends AddressFields {
-  user_name: string
-  email: string
-  password: string
   legal_name: string
   trade_name?: string | null
   cnpj: string
@@ -88,12 +87,9 @@ export interface CreateCompanyPayload extends AddressFields {
   is_active?: boolean
 }
 
-export type UpdateCompanyPayload = Partial<Omit<CreateCompanyPayload, 'user_name' | 'email' | 'password'>>
+export type UpdateCompanyPayload = Partial<CreateCompanyPayload>
 
 export interface CreateEstablishmentPayload extends AddressFields {
-  user_name: string
-  email: string
-  password: string
   name: string
   cnpj: string
   category_id?: number | null
@@ -102,6 +98,4 @@ export interface CreateEstablishmentPayload extends AddressFields {
   is_active?: boolean
 }
 
-export type UpdateEstablishmentPayload = Partial<
-  Omit<CreateEstablishmentPayload, 'user_name' | 'email' | 'password'>
->
+export type UpdateEstablishmentPayload = Partial<CreateEstablishmentPayload>

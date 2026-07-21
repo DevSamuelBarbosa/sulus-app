@@ -1,6 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/modules/auth/AuthContext'
-import { isNavItemActive, navItemsByRole } from '@/app/nav-config'
+import { filterNavItemsByPermission, isNavItemActive, navItemsByRole } from '@/app/nav-config'
 import { AppSidebar } from '@/app/layouts/AppSidebar'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
@@ -15,7 +15,8 @@ function usePageTitle(): string {
   }
 
   const roleRoot = `/${user.role}`
-  const current = navItemsByRole[user.role].find((item) => isNavItemActive(pathname, item, roleRoot))
+  const items = filterNavItemsByPermission(navItemsByRole[user.role], user.tenant_role)
+  const current = items.find((item) => isNavItemActive(pathname, item, roleRoot))
   return current?.title ?? 'Visão geral'
 }
 

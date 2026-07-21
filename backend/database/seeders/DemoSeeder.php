@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\EmployeeStatus;
+use App\Enums\TenantRole;
 use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\City;
@@ -13,8 +14,11 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * Development-only demo data: one user per role with linked profiles,
- * so every dashboard can be logged into during Fase 0/1. Password: "password".
+ * Development-only demo data: one user per role with linked profiles, so
+ * every dashboard can be logged into during development. The company and
+ * establishment each get all 3 tenant permission levels (see App\Enums\TenantRole)
+ * so the Master/Administrador/Usuário Normal flows can be exercised without
+ * creating logins by hand. Password: "password" for every login.
  */
 class DemoSeeder extends Seeder
 {
@@ -28,20 +32,16 @@ class DemoSeeder extends Seeder
             ['name' => 'Administrador Sulus', 'password' => 'password', 'role' => UserRole::Admin],
         );
 
-        $companyUser = User::updateOrCreate(
-            ['email' => 'empresa@sulus.test'],
-            ['name' => 'Empresa Demo', 'password' => 'password', 'role' => UserRole::Company],
-        );
         $company = Company::updateOrCreate(
-            ['user_id' => $companyUser->id],
+            ['cnpj' => '12345678000199'],
             [
                 'legal_name' => 'Empresa Demo LTDA',
                 'trade_name' => 'Empresa Demo',
-                'cnpj' => '12345678000199',
                 'email' => 'contato@empresademo.test',
                 'city_id' => $city?->id,
             ],
         );
+        $this->tenantLogins($company, 'empresa', UserRole::Company);
 
         $employeeUser = User::updateOrCreate(
             ['email' => 'funcionario@sulus.test'],
@@ -57,18 +57,32 @@ class DemoSeeder extends Seeder
             ],
         );
 
-        $establishmentUser = User::updateOrCreate(
-            ['email' => 'estabelecimento@sulus.test'],
-            ['name' => 'Estabelecimento Demo', 'password' => 'password', 'role' => UserRole::Establishment],
-        );
-        Establishment::updateOrCreate(
-            ['user_id' => $establishmentUser->id],
+        $establishment = Establishment::updateOrCreate(
+            ['cnpj' => '98765432000188'],
             [
                 'name' => 'Restaurante Demo',
-                'cnpj' => '98765432000188',
-                'category_id' => Category::where('slug', 'alimentacao')->value('id'),
+                'category_id' => Category::where('slug', 'barbearias')->value('id'),
                 'city_id' => $city?->id,
             ],
         );
+        $this->tenantLogins($establishment, 'estabelecimento', UserRole::Establishment);
+    }
+
+    private function tenantLogins(Company|Establishment $tenant, string $prefix, UserRole $role): void
+    {
+        $tenantColumn = $tenant instanceof Company ? 'company_id' : 'establishment_id';
+
+        foreach (TenantRole::cases() as $tenantRole) {
+            User::updateOrCreate(
+                ['email' => "{$prefix}.{$tenantRole->value}@sulus.test"],
+                [
+                    'name' => ucfirst($prefix)." ({$tenantRole->label()})",
+                    'password' => 'password',
+                    'role' => $role,
+                    'tenant_role' => $tenantRole,
+                    $tenantColumn => $tenant->id,
+                ],
+            );
+        }
     }
 }

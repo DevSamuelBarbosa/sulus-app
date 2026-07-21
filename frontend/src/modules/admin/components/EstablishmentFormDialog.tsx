@@ -80,9 +80,6 @@ function EstablishmentForm({
   const updateEstablishment = useUpdateEstablishment()
   const { data: categories = [] } = useCategories()
   const [profile, setProfile] = useState({
-    user_name: '',
-    email: establishment?.login_email ?? '',
-    password: '',
     name: establishment?.name ?? '',
     cnpj: establishment?.cnpj ?? '',
     category_id: establishment?.category_id ?? (null as number | null),
@@ -124,9 +121,6 @@ function EstablishmentForm({
         })
       } else {
         await createEstablishment.mutateAsync({
-          user_name: profile.user_name,
-          email: profile.email,
-          password: profile.password,
           name: profile.name,
           cnpj: profile.cnpj,
           category_id: profile.category_id,
@@ -151,54 +145,11 @@ function EstablishmentForm({
         <DialogDescription>
           {isEdit
             ? 'Atualize os dados cadastrais do estabelecimento.'
-            : 'Cria o usuário de login e o perfil do estabelecimento parceiro.'}
+            : 'Cria o perfil do estabelecimento parceiro. Os logins são criados depois, na tela de Usuários.'}
         </DialogDescription>
       </DialogHeader>
 
       <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-        {!isEdit && (
-          <>
-            <FormSection title="Acesso" description="Credenciais de login do responsável pelo estabelecimento.">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="e_user_name">Nome do responsável (login)</Label>
-                <Input
-                  id="e_user_name"
-                  value={profile.user_name}
-                  onChange={(e) => patch({ user_name: e.target.value })}
-                  placeholder="Nome do responsável"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="e_email">E-mail de login</Label>
-                  <Input
-                    id="e_email"
-                    type="email"
-                    value={profile.email}
-                    onChange={(e) => patch({ email: e.target.value })}
-                    placeholder="email@estabelecimento.com"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="e_password">Senha</Label>
-                  <Input
-                    id="e_password"
-                    type="password"
-                    value={profile.password}
-                    onChange={(e) => patch({ password: e.target.value })}
-                    placeholder="Mínimo 8 caracteres"
-                    minLength={8}
-                    required
-                  />
-                </div>
-              </div>
-            </FormSection>
-            <Separator />
-          </>
-        )}
-
         <FormSection title="Dados do estabelecimento">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="e_name">Nome do estabelecimento</Label>

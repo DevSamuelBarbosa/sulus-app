@@ -36,7 +36,7 @@ class ImpersonationTest extends TestCase
         $company = Company::factory()->create();
         $adminToken = $admin->createToken('pwa', $admin->role->abilities())->plainTextToken;
 
-        $response = $this->asBearer($adminToken)->postJson("/api/admin/impersonate/{$company->user_id}")
+        $response = $this->asBearer($adminToken)->postJson("/api/admin/impersonate/{$company->masterUser->id}")
             ->assertOk()
             ->assertJsonPath('user.role', 'company')
             ->assertJsonPath('user.impersonated_by.id', $admin->id);
@@ -59,7 +59,7 @@ class ImpersonationTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $this->postJson("/api/admin/impersonate/{$establishment->user_id}")
+        $this->postJson("/api/admin/impersonate/{$establishment->masterUser->id}")
             ->assertOk()
             ->assertJsonPath('user.role', 'establishment')
             ->assertJsonPath('user.impersonated_by.id', $admin->id);
@@ -70,9 +70,9 @@ class ImpersonationTest extends TestCase
         $company = Company::factory()->create();
         $target = Establishment::factory()->create();
 
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
-        $this->postJson("/api/admin/impersonate/{$target->user_id}")->assertForbidden();
+        $this->postJson("/api/admin/impersonate/{$target->masterUser->id}")->assertForbidden();
     }
 
     public function test_cannot_impersonate_an_admin(): void
@@ -104,7 +104,7 @@ class ImpersonationTest extends TestCase
         $adminToken = $admin->createToken('pwa', $admin->role->abilities())->plainTextToken;
 
         $startToken = $this->asBearer($adminToken)
-            ->postJson("/api/admin/impersonate/{$company->user_id}")
+            ->postJson("/api/admin/impersonate/{$company->masterUser->id}")
             ->json('token');
 
         $stopResponse = $this->asBearer($startToken)->deleteJson('/api/admin/impersonate')

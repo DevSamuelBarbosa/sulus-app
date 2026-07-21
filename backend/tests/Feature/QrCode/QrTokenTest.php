@@ -72,7 +72,7 @@ class QrTokenTest extends TestCase
         $token = $this->postJson('/api/qrcode/generate')->json('token');
 
         $establishment = Establishment::factory()->create();
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->postJson('/api/qrcode/validate', ['token' => $token])
             ->assertOk()
@@ -83,7 +83,7 @@ class QrTokenTest extends TestCase
     public function test_validating_an_unknown_token_fails(): void
     {
         $establishment = Establishment::factory()->create();
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->postJson('/api/qrcode/validate', ['token' => 'does-not-exist'])
             ->assertStatus(410)
@@ -97,7 +97,7 @@ class QrTokenTest extends TestCase
         $token = $this->postJson('/api/qrcode/generate')->json('token');
 
         $establishment = Establishment::factory()->create();
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->postJson('/api/qrcode/validate', ['token' => $token])->assertOk();
         $this->postJson('/api/qrcode/validate', ['token' => $token])
@@ -115,7 +115,7 @@ class QrTokenTest extends TestCase
         $employee->update(['benefit_status' => 'cancelled']);
 
         $establishment = Establishment::factory()->create();
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->postJson('/api/qrcode/validate', ['token' => $token])
             ->assertForbidden()
@@ -143,7 +143,7 @@ class QrTokenTest extends TestCase
         $this->getJson("/api/qrcode/status/{$token}")->assertOk()->assertJsonPath('status', 'pending');
 
         $establishment = Establishment::factory()->create();
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
         $this->postJson('/api/qrcode/validate', ['token' => $token])->assertOk();
 
         Sanctum::actingAs($employee->user);
@@ -157,7 +157,7 @@ class QrTokenTest extends TestCase
         $token = $this->postJson('/api/qrcode/generate')->json('token');
 
         $establishment = Establishment::factory()->create();
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
         $confirmationRef = $this->postJson('/api/qrcode/validate', ['token' => $token])->json('confirmation_ref');
         $this->postJson('/api/benefits/usages', ['confirmation_ref' => $confirmationRef])->assertCreated();
 

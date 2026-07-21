@@ -2,44 +2,33 @@
 
 namespace App\Modules\Companies\Services;
 
-use App\Enums\UserRole;
 use App\Models\Company;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
 class CompanyService
 {
     /**
-     * Create the login user and the company profile in a single transaction.
+     * Creates only the company profile — logins are created separately via
+     * App\Modules\Auth\Services\TenantUserService (the first one created
+     * becomes the tenant's Master automatically).
      *
      * @param  array<string, mixed>  $data
      */
     public function create(array $data): Company
     {
-        return DB::transaction(function () use ($data) {
-            $user = User::create([
-                'name' => $data['user_name'],
-                'email' => $data['email'],
-                'password' => $data['password'],
-                'role' => UserRole::Company,
-                'is_active' => true,
-            ]);
-
-            return $user->company()->create([
-                'legal_name' => $data['legal_name'],
-                'trade_name' => $data['trade_name'] ?? null,
-                'cnpj' => $data['cnpj'],
-                'phone' => $data['phone'] ?? null,
-                'email' => $data['contact_email'] ?? null,
-                'cep' => $data['cep'] ?? null,
-                'logradouro' => $data['logradouro'] ?? null,
-                'numero' => $data['numero'] ?? null,
-                'complemento' => $data['complemento'] ?? null,
-                'bairro' => $data['bairro'] ?? null,
-                'city_id' => $data['city_id'] ?? null,
-                'is_active' => $data['is_active'] ?? true,
-            ]);
-        });
+        return Company::create([
+            'legal_name' => $data['legal_name'],
+            'trade_name' => $data['trade_name'] ?? null,
+            'cnpj' => $data['cnpj'],
+            'phone' => $data['phone'] ?? null,
+            'email' => $data['contact_email'] ?? null,
+            'cep' => $data['cep'] ?? null,
+            'logradouro' => $data['logradouro'] ?? null,
+            'numero' => $data['numero'] ?? null,
+            'complemento' => $data['complemento'] ?? null,
+            'bairro' => $data['bairro'] ?? null,
+            'city_id' => $data['city_id'] ?? null,
+            'is_active' => $data['is_active'] ?? true,
+        ]);
     }
 
     /**

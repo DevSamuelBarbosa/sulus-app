@@ -19,7 +19,7 @@ class BenefitUsageTest extends TestCase
         Sanctum::actingAs($employee->user);
         $token = $this->postJson('/api/qrcode/generate')->json('token');
 
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         return $this->postJson('/api/qrcode/validate', ['token' => $token])->json('confirmation_ref');
     }
@@ -42,7 +42,7 @@ class BenefitUsageTest extends TestCase
         $establishment = Establishment::factory()->create();
         $confirmationRef = $this->scanAndValidate($employee, $establishment);
 
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->postJson('/api/benefits/usages', ['confirmation_ref' => $confirmationRef])
             ->assertCreated()
@@ -52,7 +52,7 @@ class BenefitUsageTest extends TestCase
             'employee_id' => $employee->id,
             'company_id' => $employee->company_id,
             'establishment_id' => $establishment->id,
-            'validated_by_user_id' => $establishment->user_id,
+            'validated_by_user_id' => $establishment->masterUser->id,
             'employee_name_snapshot' => 'Maria Souza',
         ]);
     }
@@ -63,7 +63,7 @@ class BenefitUsageTest extends TestCase
         $establishment = Establishment::factory()->create();
         $confirmationRef = $this->scanAndValidate($employee, $establishment);
 
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->postJson('/api/benefits/usages', ['confirmation_ref' => $confirmationRef])->assertCreated();
         $this->postJson('/api/benefits/usages', ['confirmation_ref' => $confirmationRef])
@@ -76,7 +76,7 @@ class BenefitUsageTest extends TestCase
     public function test_registering_with_an_unknown_confirmation_ref_fails(): void
     {
         $establishment = Establishment::factory()->create();
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->postJson('/api/benefits/usages', ['confirmation_ref' => 'does-not-exist'])
             ->assertStatus(410)
@@ -91,7 +91,7 @@ class BenefitUsageTest extends TestCase
 
         $employee->update(['benefit_status' => 'cancelled']);
 
-        Sanctum::actingAs($establishment->user);
+        Sanctum::actingAs($establishment->masterUser);
 
         $this->postJson('/api/benefits/usages', ['confirmation_ref' => $confirmationRef])
             ->assertForbidden()

@@ -34,7 +34,7 @@ class EmployeeTest extends TestCase
         Employee::factory()->count(2)->for($company)->create();
         Employee::factory()->for($other)->create();
 
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->getJson('/api/company/employees')
             ->assertOk()
@@ -47,7 +47,7 @@ class EmployeeTest extends TestCase
         Employee::factory()->for($company)->create();
         Employee::factory()->for($company)->cancelled()->create();
 
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->getJson('/api/company/employees?status=cancelled')
             ->assertOk()
@@ -58,7 +58,7 @@ class EmployeeTest extends TestCase
     public function test_company_can_create_an_employee_with_login(): void
     {
         $company = Company::factory()->create();
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->postJson('/api/company/employees', [
             'email' => 'func@empresa.test',
@@ -79,7 +79,7 @@ class EmployeeTest extends TestCase
     {
         $company = Company::factory()->create();
         $existing = Employee::factory()->for($company)->create(['cpf' => '99999999999']);
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->postJson('/api/company/employees', [
             'email' => $existing->user->email,
@@ -95,7 +95,7 @@ class EmployeeTest extends TestCase
         $other = Company::factory()->create();
         $foreign = Employee::factory()->for($other)->create();
 
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->getJson("/api/company/employees/{$foreign->id}")->assertNotFound();
         $this->putJson("/api/company/employees/{$foreign->id}", ['full_name' => 'Hack'])->assertNotFound();
@@ -106,7 +106,7 @@ class EmployeeTest extends TestCase
     {
         $company = Company::factory()->create();
         $employee = Employee::factory()->for($company)->create();
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->putJson("/api/company/employees/{$employee->id}", [
             'full_name' => 'Nome Atualizado',
@@ -122,7 +122,7 @@ class EmployeeTest extends TestCase
     {
         $company = Company::factory()->create();
         $employee = Employee::factory()->for($company)->create();
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->patchJson("/api/company/employees/{$employee->id}/cancel-benefit")
             ->assertOk()->assertJsonPath('data.benefit_status', 'cancelled');
@@ -137,7 +137,7 @@ class EmployeeTest extends TestCase
     {
         $company = Company::factory()->create();
         $employee = Employee::factory()->for($company)->create();
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->deleteJson("/api/company/employees/{$employee->id}")->assertNoContent();
 
@@ -150,7 +150,7 @@ class EmployeeTest extends TestCase
         Storage::fake('public');
         $company = Company::factory()->create();
         $employee = Employee::factory()->for($company)->create();
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         // fake()->image() needs the GD extension; a fake file with an image
         // MIME exercises the same validation path without it.
@@ -171,7 +171,7 @@ class EmployeeTest extends TestCase
         Storage::fake('public');
         $company = Company::factory()->create();
         $employee = Employee::factory()->for($company)->create();
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->postJson("/api/company/employees/{$employee->id}/photo", [
             'photo' => UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf'),

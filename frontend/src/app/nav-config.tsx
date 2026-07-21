@@ -1,11 +1,24 @@
-import { Building2, History, LayoutDashboard, QrCode, ScanLine, Settings, Store, Users } from 'lucide-react'
+import {
+  Building2,
+  History,
+  LayoutDashboard,
+  QrCode,
+  ScanLine,
+  Settings,
+  Store,
+  Tags,
+  Users,
+  UserCog,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import type { Role } from '@/shared/types'
+import type { Role, TenantRole } from '@/shared/types'
 
 export interface NavItem {
   title: string
   url: string
   icon: LucideIcon
+  /** Only shown when the current login's tenant_role is one of these (company/establishment only). */
+  restrictedTo?: TenantRole[]
 }
 
 export const navItemsByRole: Record<Role, NavItem[]> = {
@@ -13,6 +26,7 @@ export const navItemsByRole: Record<Role, NavItem[]> = {
     { title: 'Visão geral', url: '/admin', icon: LayoutDashboard },
     { title: 'Empresas', url: '/admin/companies', icon: Building2 },
     { title: 'Estabelecimentos', url: '/admin/establishments', icon: Store },
+    { title: 'Categorias', url: '/admin/categories', icon: Tags },
     { title: 'Relatórios', url: '/admin/reports', icon: History },
   ],
   company: [
@@ -21,6 +35,12 @@ export const navItemsByRole: Record<Role, NavItem[]> = {
     { title: 'Estabelecimentos parceiros', url: '/company/establishments', icon: Store },
     { title: 'Histórico', url: '/company/usages', icon: History },
     { title: 'Meu perfil', url: '/company/profile', icon: Settings },
+    {
+      title: 'Usuários',
+      url: '/company/users',
+      icon: UserCog,
+      restrictedTo: ['master', 'administrador'],
+    },
   ],
   employee: [
     { title: 'Visão geral', url: '/employee', icon: LayoutDashboard },
@@ -34,6 +54,12 @@ export const navItemsByRole: Record<Role, NavItem[]> = {
     { title: 'Empresas parceiras', url: '/establishment/companies', icon: Building2 },
     { title: 'Histórico', url: '/establishment/usages', icon: History },
     { title: 'Meu perfil', url: '/establishment/profile', icon: Settings },
+    {
+      title: 'Usuários',
+      url: '/establishment/users',
+      icon: UserCog,
+      restrictedTo: ['master', 'administrador'],
+    },
   ],
 }
 
@@ -42,6 +68,11 @@ export const roleLabels: Record<Role, string> = {
   company: 'Empresa',
   employee: 'Funcionário',
   establishment: 'Estabelecimento',
+}
+
+/** Drops items restricted to tenant_roles the current login doesn't have. */
+export function filterNavItemsByPermission(items: NavItem[], tenantRole: TenantRole | null): NavItem[] {
+  return items.filter((item) => !item.restrictedTo || (tenantRole && item.restrictedTo.includes(tenantRole)))
 }
 
 /** Exact match for the role's root/overview item; prefix match otherwise. */

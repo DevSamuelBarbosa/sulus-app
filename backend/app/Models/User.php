@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\TenantRole;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,6 +24,9 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'company_id',
+        'establishment_id',
+        'tenant_role',
     ];
 
     protected $hidden = [
@@ -39,12 +44,17 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => UserRole::class,
             'is_active' => 'boolean',
+            'tenant_role' => TenantRole::class,
         ];
     }
 
-    public function company(): HasOne
+    /**
+     * The tenant this login belongs to (role=company). Multiple users can
+     * share the same company_id, each with their own tenant_role.
+     */
+    public function company(): BelongsTo
     {
-        return $this->hasOne(Company::class);
+        return $this->belongsTo(Company::class);
     }
 
     public function employee(): HasOne
@@ -52,9 +62,12 @@ class User extends Authenticatable
         return $this->hasOne(Employee::class);
     }
 
-    public function establishment(): HasOne
+    /**
+     * The tenant this login belongs to (role=establishment). See company().
+     */
+    public function establishment(): BelongsTo
     {
-        return $this->hasOne(Establishment::class);
+        return $this->belongsTo(Establishment::class);
     }
 
     /**
@@ -73,5 +86,10 @@ class User extends Authenticatable
     public function hasRole(UserRole $role): bool
     {
         return $this->role === $role;
+    }
+
+    public function isTenantMaster(): bool
+    {
+        return $this->tenant_role === TenantRole::Master;
     }
 }

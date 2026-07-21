@@ -18,8 +18,11 @@ class CompanyResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user_id' => $this->user_id,
-            'login_email' => $this->whenLoaded('user', fn () => $this->user->email),
+            'master' => $this->whenLoaded('masterUser', fn () => $this->masterUser ? [
+                'id' => $this->masterUser->id,
+                'name' => $this->masterUser->name,
+                'email' => $this->masterUser->email,
+            ] : null),
             'legal_name' => $this->legal_name,
             'trade_name' => $this->trade_name,
             'cnpj' => $this->cnpj,

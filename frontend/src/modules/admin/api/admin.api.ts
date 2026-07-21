@@ -6,8 +6,11 @@ import type {
   AdminListFilters,
   AdminReport,
   AdminStats,
+  AdminTenantUser,
+  AdminUpdateTenantUserPayload,
   CreateCompanyPayload,
   CreateEstablishmentPayload,
+  CreateTenantUserPayload,
   UpdateCompanyPayload,
   UpdateEstablishmentPayload,
 } from '@/modules/admin/types'
@@ -34,6 +37,10 @@ export const adminApi = {
       })
       return data
     },
+    async get(id: number): Promise<AdminCompany> {
+      const { data } = await httpClient.get<{ data: AdminCompany }>(`/admin/companies/${id}`)
+      return data.data
+    },
     async create(payload: CreateCompanyPayload): Promise<AdminCompany> {
       const { data } = await httpClient.post<{ data: AdminCompany }>('/admin/companies', payload)
       return data.data
@@ -44,6 +51,35 @@ export const adminApi = {
     },
     async remove(id: number): Promise<void> {
       await httpClient.delete(`/admin/companies/${id}`)
+    },
+    users: {
+      async list(companyId: number): Promise<AdminTenantUser[]> {
+        const { data } = await httpClient.get<{ data: AdminTenantUser[] }>(
+          `/admin/companies/${companyId}/users`,
+        )
+        return data.data
+      },
+      async create(companyId: number, payload: CreateTenantUserPayload): Promise<AdminTenantUser> {
+        const { data } = await httpClient.post<{ data: AdminTenantUser }>(
+          `/admin/companies/${companyId}/users`,
+          payload,
+        )
+        return data.data
+      },
+      async update(
+        companyId: number,
+        userId: number,
+        payload: AdminUpdateTenantUserPayload,
+      ): Promise<AdminTenantUser> {
+        const { data } = await httpClient.put<{ data: AdminTenantUser }>(
+          `/admin/companies/${companyId}/users/${userId}`,
+          payload,
+        )
+        return data.data
+      },
+      async remove(companyId: number, userId: number): Promise<void> {
+        await httpClient.delete(`/admin/companies/${companyId}/users/${userId}`)
+      },
     },
   },
 
@@ -58,6 +94,10 @@ export const adminApi = {
       })
       return data
     },
+    async get(id: number): Promise<AdminEstablishment> {
+      const { data } = await httpClient.get<{ data: AdminEstablishment }>(`/admin/establishments/${id}`)
+      return data.data
+    },
     async create(payload: CreateEstablishmentPayload): Promise<AdminEstablishment> {
       const { data } = await httpClient.post<{ data: AdminEstablishment }>('/admin/establishments', payload)
       return data.data
@@ -71,6 +111,35 @@ export const adminApi = {
     },
     async remove(id: number): Promise<void> {
       await httpClient.delete(`/admin/establishments/${id}`)
+    },
+    users: {
+      async list(establishmentId: number): Promise<AdminTenantUser[]> {
+        const { data } = await httpClient.get<{ data: AdminTenantUser[] }>(
+          `/admin/establishments/${establishmentId}/users`,
+        )
+        return data.data
+      },
+      async create(establishmentId: number, payload: CreateTenantUserPayload): Promise<AdminTenantUser> {
+        const { data } = await httpClient.post<{ data: AdminTenantUser }>(
+          `/admin/establishments/${establishmentId}/users`,
+          payload,
+        )
+        return data.data
+      },
+      async update(
+        establishmentId: number,
+        userId: number,
+        payload: AdminUpdateTenantUserPayload,
+      ): Promise<AdminTenantUser> {
+        const { data } = await httpClient.put<{ data: AdminTenantUser }>(
+          `/admin/establishments/${establishmentId}/users/${userId}`,
+          payload,
+        )
+        return data.data
+      },
+      async remove(establishmentId: number, userId: number): Promise<void> {
+        await httpClient.delete(`/admin/establishments/${establishmentId}/users/${userId}`)
+      },
     },
   },
 }

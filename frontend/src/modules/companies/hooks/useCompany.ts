@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { companyApi } from '@/modules/companies/api/company.api'
+import type { CreateTenantUserPayload, UpdateTenantUserPayload } from '@/shared/types/tenant'
 import type {
   CreateEmployeePayload,
   EmployeeFilters,
   UpdateCompanyProfilePayload,
+  UpdateCompanySettingsPayload,
   UpdateEmployeePayload,
   UsageFilters,
 } from '@/modules/companies/types'
@@ -21,6 +23,71 @@ export function useUpdateCompanyProfile() {
     mutationFn: (payload: UpdateCompanyProfilePayload) => companyApi.profile.update(payload),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['company', 'profile'] })
+    },
+  })
+}
+
+export function useUpdateCompanySettings() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: UpdateCompanySettingsPayload) => companyApi.profile.updateSettings(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['company', 'profile'] })
+    },
+  })
+}
+
+export function useDeleteCompanyAccount() {
+  return useMutation({
+    mutationFn: (password: string) => companyApi.profile.deleteAccount(password),
+  })
+}
+
+export function useCompanyUsers() {
+  return useQuery({
+    queryKey: ['company', 'users'],
+    queryFn: () => companyApi.users.list(),
+  })
+}
+
+export function useCreateCompanyUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: CreateTenantUserPayload) => companyApi.users.create(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['company', 'users'] })
+    },
+  })
+}
+
+export function useUpdateCompanyUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, payload }: { userId: number; payload: UpdateTenantUserPayload }) =>
+      companyApi.users.update(userId, payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['company', 'users'] })
+    },
+  })
+}
+
+export function useDeleteCompanyUser() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (userId: number) => companyApi.users.remove(userId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['company', 'users'] })
+    },
+  })
+}
+
+export function usePromoteCompanyMaster() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, password }: { userId: number; password: string }) =>
+      companyApi.users.promoteMaster(userId, password),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['company', 'users'] })
     },
   })
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\EnsureTenantPermission;
 use App\Modules\Auth\Exceptions\AccountInactiveException;
 use App\Modules\QrCode\Exceptions\BenefitInactiveException;
 use App\Modules\QrCode\Exceptions\QrTokenInvalidException;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => EnsureRole::class,
+            'tenant.permission' => EnsureTenantPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

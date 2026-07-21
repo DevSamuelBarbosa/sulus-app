@@ -30,7 +30,7 @@ class CompanyDiscoveryTest extends TestCase
 
     public function test_establishment_can_list_active_companies(): void
     {
-        Sanctum::actingAs(Establishment::factory()->create()->user);
+        Sanctum::actingAs(Establishment::factory()->create()->masterUser);
 
         Company::factory()->create(['legal_name' => 'Acme LTDA', 'is_active' => true]);
         Company::factory()->create(['legal_name' => 'Inativa LTDA', 'is_active' => false]);
@@ -43,7 +43,7 @@ class CompanyDiscoveryTest extends TestCase
 
     public function test_establishment_can_search_companies_by_trade_or_legal_name(): void
     {
-        Sanctum::actingAs(Establishment::factory()->create()->user);
+        Sanctum::actingAs(Establishment::factory()->create()->masterUser);
 
         Company::factory()->create(['legal_name' => 'Alfa Indústria LTDA', 'trade_name' => 'Alfa']);
         Company::factory()->create(['legal_name' => 'Beta Comércio LTDA', 'trade_name' => 'Beta']);
@@ -56,7 +56,7 @@ class CompanyDiscoveryTest extends TestCase
 
     public function test_filters_companies_by_city_and_state(): void
     {
-        Sanctum::actingAs(Establishment::factory()->create()->user);
+        Sanctum::actingAs(Establishment::factory()->create()->masterUser);
 
         $rs = State::create(['ibge_code' => '43', 'uf' => 'RS', 'name' => 'Rio Grande do Sul']);
         $sp = State::create(['ibge_code' => '35', 'uf' => 'SP', 'name' => 'São Paulo']);
@@ -78,7 +78,7 @@ class CompanyDiscoveryTest extends TestCase
 
     public function test_company_public_resource_omits_sensitive_fields(): void
     {
-        Sanctum::actingAs(Establishment::factory()->create()->user);
+        Sanctum::actingAs(Establishment::factory()->create()->masterUser);
 
         Company::factory()->create(['legal_name' => 'Acme LTDA', 'cnpj' => '11111111000111']);
 

@@ -27,19 +27,19 @@ class CompanyProfileTest extends TestCase
     public function test_company_can_fetch_its_own_profile(): void
     {
         $company = Company::factory()->create(['legal_name' => 'Acme LTDA']);
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->getJson('/api/company/profile')
             ->assertOk()
             ->assertJsonPath('data.id', $company->id)
             ->assertJsonPath('data.legal_name', 'Acme LTDA')
-            ->assertJsonPath('data.login_email', $company->user->email);
+            ->assertJsonPath('data.master.email', $company->masterUser->email);
     }
 
     public function test_company_can_update_its_own_profile(): void
     {
         $company = Company::factory()->create();
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->putJson('/api/company/profile', [
             'trade_name' => 'Novo Fantasia',
@@ -52,7 +52,7 @@ class CompanyProfileTest extends TestCase
     public function test_company_cannot_change_is_active_or_cnpj_via_profile(): void
     {
         $company = Company::factory()->create(['is_active' => true, 'cnpj' => '11111111000111']);
-        Sanctum::actingAs($company->user);
+        Sanctum::actingAs($company->masterUser);
 
         $this->putJson('/api/company/profile', [
             'is_active' => false,
