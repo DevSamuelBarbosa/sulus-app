@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -12,8 +13,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { FormSection } from '@/shared/components/FormSection'
+import { getErrorMessage } from '@/shared/lib/errors'
 import { AddressForm } from '@/modules/localization/components/AddressForm'
 import { emptyAddress } from '@/modules/localization/types'
 import type { AddressValue } from '@/modules/localization/types'
@@ -68,13 +69,11 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
     is_active: company?.is_active ?? true,
   })
   const [address, setAddress] = useState<AddressValue>(() => addressFromCompany(company))
-  const [error, setError] = useState<string | null>(null)
 
   const patch = (partial: Partial<typeof profile>) => setProfile((prev) => ({ ...prev, ...partial }))
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    setError(null)
 
     const addressPayload = {
       cep: address.cep || null,
@@ -111,8 +110,8 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
         })
       }
       onSaved()
-    } catch {
-      setError('Não foi possível salvar a empresa. Confira os dados e tente novamente.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Não foi possível salvar a empresa. Confira os dados e tente novamente.'))
     }
   }
 
@@ -204,12 +203,6 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
           />
           <Label htmlFor="is_active">Empresa ativa</Label>
         </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
         <DialogFooter>
           <Button type="submit" disabled={submitting}>

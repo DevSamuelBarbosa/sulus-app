@@ -62,11 +62,11 @@ export interface Employee {
   city_id: number | null
   city: CompanyCity | null
   created_at: string
+  deleted_at: string | null
 }
 
 export interface CreateEmployeePayload {
   email: string
-  password: string
   full_name: string
   cpf: string
   phone?: string | null

@@ -1,9 +1,8 @@
 import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { isAxiosError } from 'axios'
+import { toast } from 'sonner'
 import { CheckCircle2, Home, ScanLine } from 'lucide-react'
 import { initials } from '@/lib/utils'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,14 +15,10 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { getErrorMessage } from '@/shared/lib/errors'
 import { QrScanner } from '@/modules/benefits/components/QrScanner'
 import { useRegisterBenefitUsage, useValidateQrToken } from '@/modules/benefits/hooks/useBenefits'
 import type { QrValidation } from '@/modules/qrcode/types'
-import type { ApiError } from '@/shared/types'
-
-function errorMessage(err: unknown, fallback: string): string {
-  return (isAxiosError<ApiError>(err) ? err.response?.data.message : undefined) ?? fallback
-}
 
 type Step = 'scan' | 'confirm' | 'done'
 
@@ -31,20 +26,18 @@ export function ScanQrPage() {
   const [step, setStep] = useState<Step>('scan')
   const [manualToken, setManualToken] = useState('')
   const [validation, setValidation] = useState<QrValidation | null>(null)
-  const [error, setError] = useState<string | null>(null)
 
   const validateToken = useValidateQrToken()
   const registerUsage = useRegisterBenefitUsage()
 
   const handleToken = useCallback(
     async (token: string) => {
-      setError(null)
       try {
         const result = await validateToken.mutateAsync(token)
         setValidation(result)
         setStep('confirm')
       } catch (err) {
-        setError(errorMessage(err, 'Não foi possível validar o QR Code.'))
+        toast.error(getErrorMessage(err, 'Não foi possível validar o QR Code.'))
       }
     },
     [validateToken],
@@ -52,18 +45,16 @@ export function ScanQrPage() {
 
   async function handleConfirm() {
     if (!validation) return
-    setError(null)
     try {
       await registerUsage.mutateAsync(validation.confirmation_ref)
       setStep('done')
     } catch (err) {
-      setError(errorMessage(err, 'Não foi possível registrar a utilização.'))
+      toast.error(getErrorMessage(err, 'Não foi possível registrar a utilização.'))
     }
   }
 
   function reset() {
     setValidation(null)
-    setError(null)
     setManualToken('')
     setStep('scan')
   }
@@ -84,12 +75,6 @@ export function ScanQrPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
             <QrScanner active={step === 'scan'} onScan={handleToken} />
 
             <form
@@ -123,12 +108,6 @@ export function ScanQrPage() {
             <CardDescription>Confira a foto e o nome antes de liberar o benefício.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4 text-center">
-            {error && (
-              <Alert variant="destructive" className="text-left">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
             <Avatar className="size-24">
               <AvatarImage src={validation.employee.photo_url ?? undefined} />
               <AvatarFallback className="bg-primary text-2xl text-primary-foreground">

@@ -133,6 +133,14 @@ export function useSetBenefitStatus() {
   })
 }
 
+export function useRestoreEmployee() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => companyApi.employees.restore(id),
+    onSuccess: () => invalidateEmployees(queryClient),
+  })
+}
+
 export function useUploadEmployeePhoto() {
   const queryClient = useQueryClient()
   return useMutation({

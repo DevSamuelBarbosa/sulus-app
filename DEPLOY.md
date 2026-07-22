@@ -26,6 +26,7 @@ Cloudflare R2 ──────────────────▶  Fotos d
 | Banco (MySQL) | No próprio VPS (início) → Managed DB depois | — |
 | Cache/QR tokens (Redis) | No próprio VPS | — |
 | Storage de fotos | Cloudflare **R2** | 10 GB grátis |
+| E-mail transacional | **Resend** | 3.000 e-mails/mês grátis |
 | DNS / CDN / SSL | Cloudflare | grátis |
 
 ---
@@ -90,13 +91,18 @@ faz localmente.
 - [ ] PHP 8.3, extensões: `pdo_mysql`, `redis`, `intl`, `bcmath`, `zip`.
 - [ ] Banco MySQL criado + usuário/senha.
 - [ ] Redis ativo (QR tokens + cache).
-- [ ] Variáveis de ambiente de produção (ver seção 4).
+- [ ] Variáveis de ambiente de produção (ver seção 6).
 - [ ] Deploy script: `composer install --no-dev`, `php artisan migrate --force`,
       `php artisan config:cache route:cache event:cache`, `php artisan storage:link`.
 - [ ] Seed inicial **apenas** de dados canônicos: `db:seed --class=StateSeeder`,
       `CitySeeder`, `CategorySeeder`. **Não** rodar `DemoSeeder` em produção.
 - [ ] SSL emitido; forçar HTTPS.
-- [ ] Queue worker (se/quando usar filas) e scheduler via cron.
+- [ ] **Queue worker obrigatório** (não é mais opcional): o convite de e-mail do
+      funcionário (`App\Mail\EmployeeInviteMail`) é `ShouldQueue`, então sem um
+      worker rodando o e-mail nunca sai — fica parado na tabela `jobs` pra
+      sempre. No Forge: aba **Daemons** → adicionar
+      `php artisan queue:work --tries=3 --sleep=1` (reinicia sozinho se cair).
+      Sem Forge: `supervisor` rodando o mesmo comando.
 
 ### DB e Redis
 No início rodam no próprio droplet (simples/barato). Depois, se quiser backup
@@ -104,7 +110,50 @@ automático e HA, migrar o MySQL para um **Managed Database** da DigitalOcean.
 
 ---
 
-## 3. Frontend — Cloudflare Pages
+## 3. E-mail transacional — Resend
+
+Usado hoje só para o convite de ativação do funcionário
+(`App\Mail\EmployeeInviteMail`, enviado por `EmployeeActivationService`). Em
+dev local isso cai no **Mailpit** (`docker-compose.yml`, UI em
+`localhost:8025`) — em produção precisa de um provedor de verdade.
+
+O transporte `resend` já vem pronto no Laravel (`config/mail.php` +
+`config/services.php`) e o pacote `resend/resend-php` já está no
+`composer.json` — **zero mudança de código**, só variáveis de ambiente.
+
+### Passos
+1. Criar conta em [resend.com](https://resend.com) (free tier: 3.000
+   e-mails/mês, 100/dia).
+2. **Domains** → adicionar o domínio de envio (ex.: `seudominio.com`, ou um
+   subdomínio dedicado como `mail.seudominio.com` — recomendado, isola a
+   reputação de envio do domínio principal).
+3. Resend mostra os registros DNS a criar: **SPF** (TXT), **DKIM** (TXT) e
+   opcionalmente **DMARC**. Adicionar esses registros na zona DNS da
+   Cloudflare (fora do proxy — só o registro DNS, sem nuvem laranja) e
+   aguardar a verificação no painel do Resend. **Sem isso os e-mails caem em
+   spam ou são rejeitados** — não pular esta etapa.
+4. **API Keys** → criar uma chave (permissão de envio é suficiente).
+5. Preencher no `.env` de produção:
+
+```env
+MAIL_MAILER=resend
+RESEND_API_KEY=<chave gerada no painel>
+MAIL_FROM_ADDRESS=naoresponda@seudominio.com   # no domínio verificado acima
+MAIL_FROM_NAME="Sulus Benefícios"
+```
+
+`MAIL_HOST`/`MAIL_PORT`/`MAIL_USERNAME`/`MAIL_PASSWORD` (usados pelo SMTP do
+Mailpit local) ficam sem efeito com `MAIL_MAILER=resend` — pode deixar como
+estão ou remover.
+
+### Como validar
+Criar/readmitir um funcionário em produção e conferir, no painel do Resend
+(**Logs**), que o e-mail foi entregue — e que chegou na caixa de entrada (não
+spam) de um e-mail real de teste.
+
+---
+
+## 5. Frontend — Cloudflare Pages
 
 - [ ] Conectar o repositório no Cloudflare Pages.
 - [ ] Build: raiz `frontend/`, comando `npm run build`, saída `dist/`.
@@ -114,7 +163,7 @@ automático e HA, migrar o MySQL para um **Managed Database** da DigitalOcean.
 
 ---
 
-## 4. Variáveis de ambiente de produção (backend)
+## 6. Variáveis de ambiente de produção (backend)
 
 Diferenças em relação ao local:
 
@@ -131,7 +180,7 @@ DB_PASSWORD=...
 
 CACHE_STORE=redis
 REDIS_HOST=127.0.0.1
-QUEUE_CONNECTION=redis     # quando usar filas
+QUEUE_CONNECTION=redis     # precisa do worker rodando — ver checklist da seção 2
 
 # Storage R2 — ver seção 1
 FILESYSTEM_DISK=r2
@@ -143,6 +192,12 @@ R2_BUCKET=sulus-media
 R2_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
 R2_USE_PATH_STYLE_ENDPOINT=true
 
+# E-mail transacional — ver seção 3
+MAIL_MAILER=resend
+RESEND_API_KEY=...
+MAIL_FROM_ADDRESS=naoresponda@seudominio.com
+MAIL_FROM_NAME="Sulus Benefícios"
+
 # CORS / Sanctum — domínio do frontend
 FRONTEND_URL=https://app.seudominio.com
 SANCTUM_STATEFUL_DOMAINS=app.seudominio.com
@@ -152,7 +207,7 @@ Lembrar de ajustar `config/cors.php` (`allowed_origins` via `FRONTEND_URL`).
 
 ---
 
-## 5. Cloudflare na frente do backend
+## 7. Cloudflare na frente do backend
 
 - [ ] DNS de `api.seudominio.com` → IP do droplet, **proxy ligado** (nuvem laranja).
 - [ ] SSL/TLS mode: **Full (strict)** (SSL válido no droplet via Forge).
@@ -164,7 +219,10 @@ Lembrar de ajustar `config/cors.php` (`allowed_origins` via `FRONTEND_URL`).
 ## Ordem sugerida no dia do deploy
 1. Provisionar VPS (Forge) + MySQL + Redis.
 2. Configurar R2 e validar um upload real (seção 1).
-3. Subir env de produção + deploy do backend + migrations + seeds canônicos.
-4. DNS/proxy da API na Cloudflare + SSL.
-5. Cloudflare Pages para o frontend com `VITE_API_URL` de produção.
-6. Teste E2E em produção: login de cada papel → fluxo do QR → foto aparecendo.
+3. Configurar Resend (domínio verificado + SPF/DKIM) e subir o queue worker
+   (seção 3) — sem isso o cadastro de funcionário fica sem enviar convite.
+4. Subir env de produção + deploy do backend + migrations + seeds canônicos.
+5. DNS/proxy da API na Cloudflare + SSL.
+6. Cloudflare Pages para o frontend com `VITE_API_URL` de produção.
+7. Teste E2E em produção: login de cada papel → fluxo do QR → foto aparecendo
+   → cadastrar um funcionário e confirmar que o e-mail de convite chegou.

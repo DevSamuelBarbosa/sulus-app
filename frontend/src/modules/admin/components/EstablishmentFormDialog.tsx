@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { getErrorMessage } from '@/shared/lib/errors'
 import {
   Select,
   SelectContent,
@@ -88,13 +89,11 @@ function EstablishmentForm({
     is_active: establishment?.is_active ?? true,
   })
   const [address, setAddress] = useState<AddressValue>(() => addressFromEstablishment(establishment))
-  const [error, setError] = useState<string | null>(null)
 
   const patch = (partial: Partial<typeof profile>) => setProfile((prev) => ({ ...prev, ...partial }))
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    setError(null)
 
     const addressPayload = {
       cep: address.cep || null,
@@ -131,8 +130,8 @@ function EstablishmentForm({
         })
       }
       onSaved()
-    } catch {
-      setError('Não foi possível salvar o estabelecimento. Confira os dados e tente novamente.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Não foi possível salvar o estabelecimento. Confira os dados e tente novamente.'))
     }
   }
 
@@ -232,12 +231,6 @@ function EstablishmentForm({
           />
           <Label htmlFor="e_is_active">Estabelecimento ativo</Label>
         </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
         <DialogFooter>
           <Button type="submit" disabled={submitting}>

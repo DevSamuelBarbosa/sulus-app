@@ -10,23 +10,28 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class EmployeeService
 {
+    public function __construct(private readonly EmployeeActivationService $activation) {}
+
     /**
-     * Create the login user and the employee profile in a single transaction.
+     * Create the login user (inactive until the employee sets their own
+     * password) and the employee profile in a single transaction, then send
+     * the activation email once it's committed.
      *
      * @param  array<string, mixed>  $data
      */
     public function create(Company $company, array $data): Employee
     {
-        return DB::transaction(function () use ($company, $data) {
+        $employee = DB::transaction(function () use ($company, $data) {
             $user = User::create([
                 'name' => $data['full_name'],
                 'email' => $data['email'],
-                'password' => $data['password'],
+                'password' => Str::random(40),
                 'role' => UserRole::Employee,
-                'is_active' => true,
+                'is_active' => false,
             ]);
 
             return $company->employees()->create([
@@ -39,6 +44,10 @@ class EmployeeService
                 'benefit_status' => EmployeeStatus::Active,
             ]);
         });
+
+        $this->activation->sendInvite($employee->user, $company->trade_name);
+
+        return $employee;
     }
 
     /**
@@ -91,5 +100,24 @@ class EmployeeService
             $employee->user()->update(['is_active' => false]);
             $employee->delete();
         });
+    }
+
+    /**
+     * Readmits a previously removed employee. The old password is never
+     * reused — it may have leaked or been forgotten during the time off —
+     * so this restores the record but sends a fresh activation invite, same
+     * as a brand new hire.
+     */
+    public function restore(Employee $employee): Employee
+    {
+        DB::transaction(function () use ($employee) {
+            $employee->restore();
+            $employee->update(['benefit_status' => EmployeeStatus::Active]);
+            $employee->user()->update(['is_active' => false]);
+        });
+
+        $this->activation->sendInvite($employee->user, $employee->company->trade_name);
+
+        return $employee;
     }
 }

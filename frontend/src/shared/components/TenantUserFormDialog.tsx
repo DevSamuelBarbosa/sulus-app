@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -10,8 +11,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { getErrorMessage } from '@/shared/lib/errors'
 import type { TenantRole } from '@/shared/types'
 import type { TenantUser } from '@/shared/types/tenant'
 
@@ -69,12 +70,10 @@ function TenantUserForm({
   const [email, setEmail] = useState(user?.email ?? '')
   const [password, setPassword] = useState('')
   const [tenantRole, setTenantRole] = useState<TenantRole>(user?.tenant_role ?? 'normal')
-  const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    setError(null)
     setSubmitting(true)
     try {
       if (isEdit) {
@@ -83,8 +82,8 @@ function TenantUserForm({
         await onCreate({ name, email, password, tenant_role: tenantRole === 'master' ? 'normal' : tenantRole })
       }
       onSaved()
-    } catch {
-      setError('Não foi possível salvar. Confira os dados e tente novamente.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Não foi possível salvar. Confira os dados e tente novamente.'))
     } finally {
       setSubmitting(false)
     }
@@ -141,12 +140,6 @@ function TenantUserForm({
             </SelectContent>
           </Select>
         </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
         <DialogFooter>
           <Button type="submit" disabled={submitting}>

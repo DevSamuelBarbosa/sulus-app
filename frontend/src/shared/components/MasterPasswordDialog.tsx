@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -10,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { getErrorMessage } from '@/shared/lib/errors'
 
 interface MasterPasswordDialogProps {
   open: boolean
@@ -39,26 +40,23 @@ export function MasterPasswordDialog({
   onConfirm,
 }: MasterPasswordDialogProps) {
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   function handleOpenChange(next: boolean) {
     if (!next) {
       setPassword('')
-      setError(null)
     }
     onOpenChange(next)
   }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    setError(null)
     setSubmitting(true)
     try {
       await onConfirm(password)
       handleOpenChange(false)
-    } catch {
-      setError('Senha incorreta.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Senha incorreta.'))
     } finally {
       setSubmitting(false)
     }
@@ -85,12 +83,6 @@ export function MasterPasswordDialog({
               required
             />
           </div>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
 
           <DialogFooter>
             <Button type="submit" variant={destructive ? 'destructive' : 'default'} disabled={submitting}>

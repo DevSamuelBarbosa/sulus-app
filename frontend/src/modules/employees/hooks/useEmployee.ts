@@ -7,3 +7,10 @@ export function useEmployeeUsages(page: number) {
     queryFn: () => employeeApi.usages.list(page),
   })
 }
+
+export function useEmployeeProfile() {
+  return useQuery({
+    queryKey: ['employee', 'profile'],
+    queryFn: () => employeeApi.profile.get(),
+  })
+}

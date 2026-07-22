@@ -35,6 +35,7 @@ class EmployeeResource extends JsonResource
             'benefit_status_label' => $this->benefit_status->label(),
             'hired_at' => $this->hired_at?->toDateString(),
             'created_at' => $this->created_at,
+            'deleted_at' => $this->deleted_at,
         ];
     }
 }

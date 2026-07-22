@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +19,7 @@ import { AddressForm } from '@/modules/localization/components/AddressForm'
 import type { AddressValue } from '@/modules/localization/types'
 import { useCategories } from '@/modules/categories/hooks/useCategories'
 import { useAuth } from '@/modules/auth/AuthContext'
+import { getErrorMessage } from '@/shared/lib/errors'
 import { MasterPasswordDialog } from '@/shared/components/MasterPasswordDialog'
 import {
   useDeleteEstablishmentAccount,
@@ -65,13 +67,13 @@ function EstablishmentProfileForm({ profile }: { profile: EstablishmentProfile }
     phone: profile.phone ?? '',
   })
   const [address, setAddress] = useState<AddressValue>(() => addressFromProfile(profile))
-  const [feedback, setFeedback] = useState<'ok' | 'error' | null>(null)
+  const [saved, setSaved] = useState(false)
 
   const patch = (partial: Partial<typeof form>) => setForm((prev) => ({ ...prev, ...partial }))
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    setFeedback(null)
+    setSaved(false)
     try {
       await updateProfile.mutateAsync({
         name: form.name,
@@ -85,9 +87,9 @@ function EstablishmentProfileForm({ profile }: { profile: EstablishmentProfile }
         bairro: address.bairro || null,
         city_id: address.city_id,
       })
-      setFeedback('ok')
-    } catch {
-      setFeedback('error')
+      setSaved(true)
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Não foi possível salvar. Confira os dados e tente novamente.'))
     }
   }
 
@@ -163,14 +165,9 @@ function EstablishmentProfileForm({ profile }: { profile: EstablishmentProfile }
 
           <AddressForm value={address} onChange={setAddress} />
 
-          {feedback === 'ok' && (
+          {saved && (
             <Alert>
               <AlertDescription>Perfil atualizado com sucesso.</AlertDescription>
-            </Alert>
-          )}
-          {feedback === 'error' && (
-            <Alert variant="destructive">
-              <AlertDescription>Não foi possível salvar. Confira os dados e tente novamente.</AlertDescription>
             </Alert>
           )}
 

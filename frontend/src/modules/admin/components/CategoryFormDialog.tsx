@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -10,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { getErrorMessage } from '@/shared/lib/errors'
 import { useCreateCategory, useUpdateCategory } from '@/modules/categories/hooks/useCategories'
 import type { Category } from '@/modules/categories/api/categories.api'
 
@@ -41,11 +42,9 @@ function CategoryForm({ category, onSaved }: { category?: Category | null; onSav
   const createCategory = useCreateCategory()
   const updateCategory = useUpdateCategory()
   const [name, setName] = useState(category?.name ?? '')
-  const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    setError(null)
 
     try {
       if (isEdit && category) {
@@ -54,8 +53,8 @@ function CategoryForm({ category, onSaved }: { category?: Category | null; onSav
         await createCategory.mutateAsync(name)
       }
       onSaved()
-    } catch {
-      setError('Não foi possível salvar a categoria. Talvez já exista uma com esse nome.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Não foi possível salvar a categoria. Talvez já exista uma com esse nome.'))
     }
   }
 
@@ -81,12 +80,6 @@ function CategoryForm({ category, onSaved }: { category?: Category | null; onSav
             required
           />
         </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
         <DialogFooter>
           <Button type="submit" disabled={submitting}>

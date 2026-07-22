@@ -23,19 +23,31 @@ class EmployeeController extends Controller
     {
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:120'],
-            'status' => ['nullable', 'in:active,cancelled'],
+            'status' => ['nullable', 'in:active,cancelled,removed'],
             'state_id' => ['nullable', 'integer', 'exists:states,id'],
             'city_id' => ['nullable', 'integer', 'exists:cities,id'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ]);
 
-        $employees = $this->company($request)->employees()
+        $status = $validated['status'] ?? null;
+        $query = $this->company($request)->employees();
+
+        // "Removed" employees are soft-deleted — excluded from every other
+        // status by Eloquent's default scope, only visible via this filter.
+        if ($status === 'removed') {
+            $query->onlyTrashed();
+        }
+
+        $employees = $query
             ->with(['user:id,email', 'city.state'])
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%{$search}%")
                     ->orWhere('cpf', 'like', "%{$search}%");
             }))
-            ->when($validated['status'] ?? null, fn ($q, $status) => $q->where('benefit_status', $status))
+            ->when(
+                $status && $status !== 'removed',
+                fn ($q) => $q->where('benefit_status', $status),
+            )
             ->when($validated['city_id'] ?? null, fn ($q, $cityId) => $q->where('city_id', $cityId))
             ->when(
                 $validated['state_id'] ?? null,
@@ -72,6 +84,19 @@ class EmployeeController extends Controller
         $this->employees->delete($this->find($request, $employee));
 
         return response()->noContent();
+    }
+
+    /**
+     * Readmits a previously removed employee — restores the record and sends
+     * a fresh activation invite (the old password is never reused, see
+     * EmployeeService::restore).
+     */
+    public function restore(Request $request, int $employee): EmployeeResource
+    {
+        $model = $this->company($request)->employees()->onlyTrashed()->findOrFail($employee);
+        $this->employees->restore($model);
+
+        return new EmployeeResource($model->fresh()->load(['user:id,email', 'city.state']));
     }
 
     public function cancelBenefit(Request $request, int $employee): EmployeeResource

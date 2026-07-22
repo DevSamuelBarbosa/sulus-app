@@ -1,8 +1,8 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { RowActionsMenu } from '@/shared/components/RowActionsMenu'
 import { TenantUserFormDialog } from '@/shared/components/TenantUserFormDialog'
+import { getErrorMessage } from '@/shared/lib/errors'
 import type { TenantRole } from '@/shared/types'
 import type { TenantUser } from '@/shared/types/tenant'
 
@@ -48,7 +49,6 @@ export function TenantUsersTable({
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<TenantUser | null>(null)
   const [deleting, setDeleting] = useState<TenantUser | null>(null)
-  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   function openCreate() {
     setEditing(null)
@@ -62,12 +62,11 @@ export function TenantUsersTable({
 
   async function handleDelete() {
     if (!deleting) return
-    setDeleteError(null)
     try {
       await onRemove(deleting.id)
       setDeleting(null)
-    } catch {
-      setDeleteError('Não foi possível remover este login.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Não foi possível remover este login.'))
     }
   }
 
@@ -128,10 +127,7 @@ export function TenantUsersTable({
                         label: 'Remover',
                         variant: 'destructive' as const,
                         disabled: user.tenant_role === 'master',
-                        onClick: () => {
-                          setDeleteError(null)
-                          setDeleting(user)
-                        },
+                        onClick: () => setDeleting(user),
                       },
                     ]}
                   />
@@ -159,11 +155,6 @@ export function TenantUsersTable({
               "{deleting?.name}" ({deleting?.email}) não poderá mais acessar a conta.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {deleteError && (
-            <Alert variant="destructive">
-              <AlertDescription>{deleteError}</AlertDescription>
-            </Alert>
-          )}
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={(e) => { e.preventDefault(); void handleDelete() }}>

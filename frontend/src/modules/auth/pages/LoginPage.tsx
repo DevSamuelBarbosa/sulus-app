@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { isAxiosError } from 'axios'
+import { toast } from 'sonner'
 import { useAuth } from '@/modules/auth/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { ApiError } from '@/shared/types'
 
 export function LoginPage() {
@@ -13,12 +13,10 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    setError(null)
     setSubmitting(true)
     try {
       await login({ email, password })
@@ -28,7 +26,7 @@ export function LoginPage() {
         navigate('/conta-desativada')
         return
       }
-      setError('Credenciais inválidas ou serviço indisponível.')
+      toast.error('Credenciais inválidas ou serviço indisponível.')
     } finally {
       setSubmitting(false)
     }
@@ -64,11 +62,6 @@ export function LoginPage() {
             required
           />
         </div>
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
         <Button type="submit" disabled={submitting} className="w-full cursor-pointer">
           {submitting ? 'Entrando…' : 'Entrar'}
         </Button>

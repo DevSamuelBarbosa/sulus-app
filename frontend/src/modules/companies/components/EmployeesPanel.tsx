@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { initials } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -24,9 +25,11 @@ import {
 } from '@/components/ui/alert-dialog'
 import { RowActionsMenu } from '@/shared/components/RowActionsMenu'
 import { LocationFilter } from '@/modules/discovery/components/LocationFilter'
+import { getErrorMessage } from '@/shared/lib/errors'
 import {
   useDeleteEmployee,
   useEmployees,
+  useRestoreEmployee,
   useSetBenefitStatus,
 } from '@/modules/companies/hooks/useCompany'
 import { EmployeeFormDialog } from '@/modules/companies/components/EmployeeFormDialog'
@@ -40,6 +43,7 @@ export function EmployeesPanel() {
   const { data, isLoading } = useEmployees({ search, status, stateId, cityId })
   const deleteEmployee = useDeleteEmployee()
   const setBenefit = useSetBenefitStatus()
+  const restoreEmployee = useRestoreEmployee()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Employee | null>(null)
   const [deleting, setDeleting] = useState<Employee | null>(null)
@@ -52,6 +56,15 @@ export function EmployeesPanel() {
   function openEdit(employee: Employee) {
     setEditing(employee)
     setFormOpen(true)
+  }
+
+  async function handleRestore(employee: Employee) {
+    try {
+      await restoreEmployee.mutateAsync(employee.id)
+      toast.success(`${employee.full_name} foi readmitido e recebeu um novo convite por e-mail.`)
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Não foi possível readmitir este funcionário.'))
+    }
   }
 
   return (
@@ -72,6 +85,7 @@ export function EmployeesPanel() {
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="active">Ativos</SelectItem>
               <SelectItem value="cancelled">Cancelados</SelectItem>
+              <SelectItem value="removed">Removidos</SelectItem>
             </SelectContent>
           </Select>
           <LocationFilter
@@ -113,6 +127,7 @@ export function EmployeesPanel() {
               </TableRow>
             )}
             {data?.data.map((employee) => {
+              const removed = employee.deleted_at !== null
               const cancelled = employee.benefit_status === 'cancelled'
               return (
                 <TableRow key={employee.id}>
@@ -133,22 +148,40 @@ export function EmployeesPanel() {
                   <TableCell>{employee.cpf}</TableCell>
                   <TableCell>{employee.city ? `${employee.city.name}/${employee.city.uf}` : '—'}</TableCell>
                   <TableCell>
-                    <Badge variant={cancelled ? 'outline' : 'secondary'}>
-                      {employee.benefit_status_label}
-                    </Badge>
+                    {removed ? (
+                      <Badge variant="destructive">Removido</Badge>
+                    ) : (
+                      <Badge variant={cancelled ? 'outline' : 'secondary'}>
+                        {employee.benefit_status_label}
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     <RowActionsMenu
-                      actions={[
-                        {
-                          label: cancelled ? 'Reativar' : 'Cancelar',
-                          disabled: setBenefit.isPending,
-                          onClick: () =>
-                            void setBenefit.mutateAsync({ id: employee.id, cancel: !cancelled }),
-                        },
-                        { label: 'Editar', onClick: () => openEdit(employee) },
-                        { label: 'Excluir', variant: 'destructive', onClick: () => setDeleting(employee) },
-                      ]}
+                      actions={
+                        removed
+                          ? [
+                              {
+                                label: 'Readmitir',
+                                disabled: restoreEmployee.isPending,
+                                onClick: () => void handleRestore(employee),
+                              },
+                            ]
+                          : [
+                              {
+                                label: cancelled ? 'Reativar' : 'Cancelar',
+                                disabled: setBenefit.isPending,
+                                onClick: () =>
+                                  void setBenefit.mutateAsync({ id: employee.id, cancel: !cancelled }),
+                              },
+                              { label: 'Editar', onClick: () => openEdit(employee) },
+                              {
+                                label: 'Excluir',
+                                variant: 'destructive',
+                                onClick: () => setDeleting(employee),
+                              },
+                            ]
+                      }
                     />
                   </TableCell>
                 </TableRow>

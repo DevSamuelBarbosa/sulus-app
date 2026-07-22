@@ -20,6 +20,7 @@ Route::get('/health', fn () => [
 require __DIR__.'/api/localization.php';
 require __DIR__.'/api/categories.php';
 require __DIR__.'/api/auth.php';
+require __DIR__.'/api/employee.php';
 require __DIR__.'/api/admin.php';
 require __DIR__.'/api/company.php';
 require __DIR__.'/api/establishment.php';

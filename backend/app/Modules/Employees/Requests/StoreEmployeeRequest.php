@@ -18,8 +18,9 @@ class StoreEmployeeRequest extends FormRequest
     {
         return [
             // Login user for the employee (used later to generate the QR code).
+            // No password here — the employee sets their own via the
+            // activation email (see EmployeeActivationService).
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
 
             // Employee profile.
             'full_name' => ['required', 'string', 'max:255'],

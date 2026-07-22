@@ -39,4 +39,5 @@ Route::prefix('company')->middleware(['auth:sanctum', 'role:company'])->group(fu
     Route::post('employees/{employee}/photo', [EmployeeController::class, 'uploadPhoto']);
     Route::patch('employees/{employee}/cancel-benefit', [EmployeeController::class, 'cancelBenefit']);
     Route::patch('employees/{employee}/reactivate-benefit', [EmployeeController::class, 'reactivateBenefit']);
+    Route::patch('employees/{employee}/restore', [EmployeeController::class, 'restore']);
 });

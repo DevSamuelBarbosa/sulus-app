@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { isAxiosError } from 'axios'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,10 +13,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { RowActionsMenu } from '@/shared/components/RowActionsMenu'
+import { getErrorMessage } from '@/shared/lib/errors'
 import { useCategories, useDeleteCategory } from '@/modules/categories/hooks/useCategories'
 import { CategoryFormDialog } from '@/modules/admin/components/CategoryFormDialog'
 import type { Category } from '@/modules/categories/api/categories.api'
-import type { ApiError } from '@/shared/types'
 
 export function CategoriesPanel() {
   const { data, isLoading } = useCategories()
@@ -25,7 +24,6 @@ export function CategoriesPanel() {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
   const [deleting, setDeleting] = useState<Category | null>(null)
-  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   function openCreate() {
     setEditing(null)
@@ -39,15 +37,11 @@ export function CategoriesPanel() {
 
   async function handleDelete() {
     if (!deleting) return
-    setDeleteError(null)
     try {
       await deleteCategory.mutateAsync(deleting.id)
       setDeleting(null)
     } catch (err) {
-      const message = isAxiosError<ApiError>(err)
-        ? Object.values(err.response?.data.errors ?? {})[0]?.[0]
-        : undefined
-      setDeleteError(message || 'Não foi possível excluir a categoria.')
+      toast.error(getErrorMessage(err, 'Não foi possível excluir a categoria.'))
     }
   }
 
@@ -92,10 +86,7 @@ export function CategoriesPanel() {
                       {
                         label: 'Excluir',
                         variant: 'destructive',
-                        onClick: () => {
-                          setDeleteError(null)
-                          setDeleting(category)
-                        },
+                        onClick: () => setDeleting(category),
                       },
                     ]}
                   />
@@ -117,11 +108,6 @@ export function CategoriesPanel() {
               podem ser excluídas.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {deleteError && (
-            <Alert variant="destructive">
-              <AlertDescription>{deleteError}</AlertDescription>
-            </Alert>
-          )}
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={(e) => { e.preventDefault(); void handleDelete() }}>

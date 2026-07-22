@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Frontend URL
+    |--------------------------------------------------------------------------
+    |
+    | Base URL of the SPA, used to build links sent by email (e.g. employee
+    | activation). FRONTEND_URL may list several comma-separated origins for
+    | CORS (see config/cors.php) — only the first one is a real link target.
+    |
+    */
+
+    'frontend_url' => explode(',', env('FRONTEND_URL', 'http://localhost:5173'))[0],
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

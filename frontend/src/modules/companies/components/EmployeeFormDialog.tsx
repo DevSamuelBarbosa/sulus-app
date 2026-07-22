@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -10,10 +11,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { StateSelect } from '@/shared/components/StateSelect'
 import { CityCombobox } from '@/shared/components/CityCombobox'
+import { getErrorMessage } from '@/shared/lib/errors'
 import {
   useCreateEmployee,
   useUpdateEmployee,
@@ -61,7 +62,6 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
 
   const [form, setForm] = useState({
     email: employee?.login_email ?? '',
-    password: '',
     full_name: employee?.full_name ?? '',
     cpf: employee?.cpf ?? '',
     phone: employee?.phone ?? '',
@@ -69,18 +69,16 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
   })
   const [stateId, setStateId] = useState<number | null>(employee?.city?.state_id ?? null)
   const [cityId, setCityId] = useState<number | null>(employee?.city_id ?? null)
-  const [error, setError] = useState<string | null>(null)
 
   const patch = (partial: Partial<typeof form>) => setForm((prev) => ({ ...prev, ...partial }))
 
   async function handlePhotoChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file || !employee) return
-    setError(null)
     try {
       await uploadPhoto.mutateAsync({ id: employee.id, file })
-    } catch {
-      setError('Não foi possível enviar a foto. Use uma imagem de até 4 MB.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Não foi possível enviar a foto. Use uma imagem de até 4 MB.'))
     } finally {
       if (fileInput.current) fileInput.current.value = ''
     }
@@ -88,7 +86,6 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    setError(null)
 
     try {
       if (isEdit && employee) {
@@ -105,7 +102,6 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
       } else {
         await createEmployee.mutateAsync({
           email: form.email,
-          password: form.password,
           full_name: form.full_name,
           cpf: form.cpf,
           phone: form.phone || null,
@@ -114,8 +110,8 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
         })
       }
       onSaved()
-    } catch {
-      setError('Não foi possível salvar o funcionário. Confira os dados e tente novamente.')
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Não foi possível salvar o funcionário. Confira os dados e tente novamente.'))
     }
   }
 
@@ -128,7 +124,7 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
         <DialogDescription>
           {isEdit
             ? 'Atualize os dados do funcionário e a foto de identificação.'
-            : 'Cria o acesso de login e o perfil do funcionário.'}
+            : 'O funcionário recebe um e-mail para definir a própria senha e ativar o acesso.'}
         </DialogDescription>
       </DialogHeader>
 
@@ -166,30 +162,16 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {!isEdit && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">E-mail de login</Label>
-              <Input
-                id="email"
-                type="email"
-                value={form.email}
-                onChange={(e) => patch({ email: e.target.value })}
-                placeholder="email@empresa.com"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                value={form.password}
-                onChange={(e) => patch({ password: e.target.value })}
-                placeholder="Mínimo 8 caracteres"
-                minLength={8}
-                required
-              />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="email">E-mail de login</Label>
+            <Input
+              id="email"
+              type="email"
+              value={form.email}
+              onChange={(e) => patch({ email: e.target.value })}
+              placeholder="email@empresa.com"
+              required
+            />
           </div>
         )}
 
@@ -263,12 +245,6 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
             />
           </div>
         </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
         <DialogFooter>
           <Button type="submit" disabled={submitting}>

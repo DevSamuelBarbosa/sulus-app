@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { AuthProvider } from '@/modules/auth/AuthContext'
 import { ThemeProvider } from '@/app/theme-provider'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { Toaster } from '@/components/ui/sonner'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,6 +19,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <AuthProvider>
           <BrowserRouter>
             <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
+            <Toaster />
           </BrowserRouter>
         </AuthProvider>
       </QueryClientProvider>

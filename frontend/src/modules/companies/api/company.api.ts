@@ -90,6 +90,10 @@ export const companyApi = {
       )
       return data.data
     },
+    async restore(id: number): Promise<Employee> {
+      const { data } = await httpClient.patch<{ data: Employee }>(`/company/employees/${id}/restore`)
+      return data.data
+    },
     async uploadPhoto(id: number, file: File): Promise<Employee> {
       const form = new FormData()
       form.append('photo', file)

@@ -27,11 +27,14 @@ class User extends Authenticatable
         'company_id',
         'establishment_id',
         'tenant_role',
+        'activation_token',
+        'activation_expires_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'activation_token',
     ];
 
     /**
@@ -45,6 +48,7 @@ class User extends Authenticatable
             'role' => UserRole::class,
             'is_active' => 'boolean',
             'tenant_role' => TenantRole::class,
+            'activation_expires_at' => 'datetime',
         ];
     }
 
