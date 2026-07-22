@@ -15,6 +15,25 @@ import type {
   UpdateEstablishmentPayload,
 } from '@/modules/admin/types'
 
+/**
+ * Flattens a create payload into FormData — only used when a `logo` file is
+ * present, since Laravel needs multipart for file uploads. `null`/`undefined`
+ * fields are omitted rather than sent as the strings "null"/"undefined".
+ */
+function toFormData(payload: object): FormData {
+  const form = new FormData()
+  for (const [key, value] of Object.entries(payload)) {
+    if (value === null || value === undefined) continue
+    // Laravel's `boolean` rule accepts "0"/"1" but not the strings "true"/"false".
+    if (typeof value === 'boolean') {
+      form.append(key, value ? '1' : '0')
+      continue
+    }
+    form.append(key, value instanceof File ? value : String(value))
+  }
+  return form
+}
+
 export const adminApi = {
   async getStats(): Promise<AdminStats> {
     const { data } = await httpClient.get<{ data: AdminStats }>('/admin/stats')
@@ -42,7 +61,8 @@ export const adminApi = {
       return data.data
     },
     async create(payload: CreateCompanyPayload): Promise<AdminCompany> {
-      const { data } = await httpClient.post<{ data: AdminCompany }>('/admin/companies', payload)
+      const body = payload.logo ? toFormData(payload) : payload
+      const { data } = await httpClient.post<{ data: AdminCompany }>('/admin/companies', body)
       return data.data
     },
     async update(id: number, payload: UpdateCompanyPayload): Promise<AdminCompany> {
@@ -51,6 +71,12 @@ export const adminApi = {
     },
     async remove(id: number): Promise<void> {
       await httpClient.delete(`/admin/companies/${id}`)
+    },
+    async uploadLogo(id: number, file: File): Promise<AdminCompany> {
+      const form = new FormData()
+      form.append('logo', file)
+      const { data } = await httpClient.post<{ data: AdminCompany }>(`/admin/companies/${id}/logo`, form)
+      return data.data
     },
     users: {
       async list(companyId: number): Promise<AdminTenantUser[]> {
@@ -99,7 +125,8 @@ export const adminApi = {
       return data.data
     },
     async create(payload: CreateEstablishmentPayload): Promise<AdminEstablishment> {
-      const { data } = await httpClient.post<{ data: AdminEstablishment }>('/admin/establishments', payload)
+      const body = payload.logo ? toFormData(payload) : payload
+      const { data } = await httpClient.post<{ data: AdminEstablishment }>('/admin/establishments', body)
       return data.data
     },
     async update(id: number, payload: UpdateEstablishmentPayload): Promise<AdminEstablishment> {
@@ -111,6 +138,15 @@ export const adminApi = {
     },
     async remove(id: number): Promise<void> {
       await httpClient.delete(`/admin/establishments/${id}`)
+    },
+    async uploadLogo(id: number, file: File): Promise<AdminEstablishment> {
+      const form = new FormData()
+      form.append('logo', file)
+      const { data } = await httpClient.post<{ data: AdminEstablishment }>(
+        `/admin/establishments/${id}/logo`,
+        form,
+      )
+      return data.data
     },
     users: {
       async list(establishmentId: number): Promise<AdminTenantUser[]> {

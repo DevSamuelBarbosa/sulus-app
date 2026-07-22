@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\Establishment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -104,5 +106,50 @@ class AdminEstablishmentTest extends TestCase
         $this->getJson('/api/admin/stats')
             ->assertOk()
             ->assertJsonPath('data.establishments_count', 2);
+    }
+
+    public function test_admin_can_create_an_establishment_with_a_logo(): void
+    {
+        Storage::fake('public');
+        Sanctum::actingAs(User::factory()->admin()->create());
+
+        $response = $this->postJson('/api/admin/establishments', [
+            'name' => 'Restaurante Com Logo',
+            'cnpj' => '98765432000222',
+            'logo' => UploadedFile::fake()->create('logo.jpg', 200, 'image/jpeg'),
+        ]);
+
+        $response->assertCreated();
+        $this->assertNotNull($response->json('data.logo_url'));
+
+        $establishment = Establishment::where('cnpj', '98765432000222')->firstOrFail();
+        Storage::disk('public')->assertExists($establishment->logo_path);
+    }
+
+    public function test_admin_can_change_an_establishments_logo(): void
+    {
+        Storage::fake('public');
+        Sanctum::actingAs(User::factory()->admin()->create());
+        $establishment = Establishment::factory()->create();
+
+        $response = $this->postJson("/api/admin/establishments/{$establishment->id}/logo", [
+            'logo' => UploadedFile::fake()->create('novo-logo.jpg', 200, 'image/jpeg'),
+        ]);
+
+        $response->assertOk();
+        $this->assertNotNull($response->json('data.logo_url'));
+
+        $establishment->refresh();
+        Storage::disk('public')->assertExists($establishment->logo_path);
+    }
+
+    public function test_non_admin_cannot_change_an_establishments_logo(): void
+    {
+        Sanctum::actingAs(User::factory()->role(UserRole::Establishment)->create());
+        $establishment = Establishment::factory()->create();
+
+        $this->postJson("/api/admin/establishments/{$establishment->id}/logo", [
+            'logo' => UploadedFile::fake()->create('novo-logo.jpg', 200, 'image/jpeg'),
+        ])->assertForbidden();
     }
 }

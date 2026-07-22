@@ -3,13 +3,17 @@
 namespace App\Modules\Companies\Services;
 
 use App\Models\Company;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyService
 {
     /**
      * Creates only the company profile — logins are created separately via
      * App\Modules\Auth\Services\TenantUserService (the first one created
-     * becomes the tenant's Master automatically).
+     * becomes the tenant's Master automatically). The logo is optional and,
+     * once set, can only be changed by an admin (see updateLogo()) — the
+     * tenant's own self-service profile never exposes this field.
      *
      * @param  array<string, mixed>  $data
      */
@@ -28,7 +32,27 @@ class CompanyService
             'bairro' => $data['bairro'] ?? null,
             'city_id' => $data['city_id'] ?? null,
             'is_active' => $data['is_active'] ?? true,
+            'logo_path' => isset($data['logo']) ? $data['logo']->store('companies/logos', config('media.disk')) : null,
         ]);
+    }
+
+    /**
+     * Replaces the company's logo, deleting the previous file if present.
+     * Admin-only (see routes/api/admin.php) — mirrors EmployeeService::storePhoto().
+     */
+    public function updateLogo(Company $company, UploadedFile $logo): Company
+    {
+        $disk = Storage::disk(config('media.disk'));
+
+        $path = $logo->store('companies/logos', config('media.disk'));
+
+        if ($company->logo_path) {
+            $disk->delete($company->logo_path);
+        }
+
+        $company->update(['logo_path' => $path]);
+
+        return $company;
     }
 
     /**

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -13,12 +13,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { FormSection } from '@/shared/components/FormSection'
 import { getErrorMessage } from '@/shared/lib/errors'
 import { AddressForm } from '@/modules/localization/components/AddressForm'
 import { emptyAddress } from '@/modules/localization/types'
 import type { AddressValue } from '@/modules/localization/types'
-import { useCreateCompany, useUpdateCompany } from '@/modules/admin/hooks/useAdmin'
+import { useCreateCompany, useUpdateCompany, useUploadCompanyLogo } from '@/modules/admin/hooks/useAdmin'
 import type { AdminCompany } from '@/modules/admin/types'
 
 interface CompanyFormDialogProps {
@@ -56,10 +57,21 @@ export function CompanyFormDialog({ open, onOpenChange, company }: CompanyFormDi
   )
 }
 
+function initials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('')
+}
+
 function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSaved: () => void }) {
   const isEdit = Boolean(company)
   const createCompany = useCreateCompany()
   const updateCompany = useUpdateCompany()
+  const uploadLogo = useUploadCompanyLogo()
+  const fileInput = useRef<HTMLInputElement>(null)
   const [profile, setProfile] = useState({
     legal_name: company?.legal_name ?? '',
     trade_name: company?.trade_name ?? '',
@@ -69,8 +81,28 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
     is_active: company?.is_active ?? true,
   })
   const [address, setAddress] = useState<AddressValue>(() => addressFromCompany(company))
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   const patch = (partial: Partial<typeof profile>) => setProfile((prev) => ({ ...prev, ...partial }))
+
+  async function handleLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (isEdit && company) {
+      try {
+        await uploadLogo.mutateAsync({ id: company.id, file })
+      } catch (err) {
+        toast.error(getErrorMessage(err, 'Não foi possível enviar o logo. Use uma imagem de até 4 MB.'))
+      } finally {
+        if (fileInput.current) fileInput.current.value = ''
+      }
+    } else {
+      setLogoFile(file)
+      setLogoPreview(URL.createObjectURL(file))
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -106,6 +138,7 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
           phone: profile.phone || null,
           contact_email: profile.contact_email || null,
           is_active: profile.is_active,
+          logo: logoFile,
           ...addressPayload,
         })
       }
@@ -127,6 +160,42 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
             : 'Cria o perfil da empresa. Os logins são criados depois, na tela de Usuários.'}
         </DialogDescription>
       </DialogHeader>
+
+      <div className="flex items-center gap-4 rounded-lg border border-border p-3">
+        <Avatar className="size-16">
+          {(logoPreview ?? company?.logo_url) && (
+            <AvatarImage src={logoPreview ?? company!.logo_url!} alt={profile.legal_name} />
+          )}
+          <AvatarFallback>{initials(profile.legal_name || 'E')}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm text-muted-foreground">
+            Logo exibido no perfil da empresa. Só o admin pode alterá-lo.
+          </span>
+          <div>
+            <input
+              ref={fileInput}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleLogoChange}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={uploadLogo.isPending}
+              onClick={() => fileInput.current?.click()}
+            >
+              {uploadLogo.isPending
+                ? 'Enviando…'
+                : (logoPreview ?? company?.logo_url)
+                  ? 'Trocar logo'
+                  : 'Enviar logo'}
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
         <FormSection title="Dados da empresa">

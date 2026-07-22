@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Modules\Companies\Requests\StoreCompanyRequest;
 use App\Modules\Companies\Requests\UpdateCompanyRequest;
+use App\Modules\Companies\Requests\UploadCompanyLogoRequest;
 use App\Modules\Companies\Resources\CompanyResource;
 use App\Modules\Companies\Services\CompanyService;
 use Illuminate\Http\Request;
@@ -67,5 +68,12 @@ class CompanyController extends Controller
         $this->companies->delete($company);
 
         return response()->noContent();
+    }
+
+    public function uploadLogo(UploadCompanyLogoRequest $request, Company $company): CompanyResource
+    {
+        $this->companies->updateLogo($company, $request->file('logo'));
+
+        return new CompanyResource($company->load(['masterUser', 'city.state']));
     }
 }

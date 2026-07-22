@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getErrorMessage } from '@/shared/lib/errors'
 import {
   Select,
@@ -26,7 +27,11 @@ import { FormSection } from '@/shared/components/FormSection'
 import { AddressForm } from '@/modules/localization/components/AddressForm'
 import { emptyAddress } from '@/modules/localization/types'
 import type { AddressValue } from '@/modules/localization/types'
-import { useCreateEstablishment, useUpdateEstablishment } from '@/modules/admin/hooks/useAdmin'
+import {
+  useCreateEstablishment,
+  useUpdateEstablishment,
+  useUploadEstablishmentLogo,
+} from '@/modules/admin/hooks/useAdmin'
 import { useCategories } from '@/modules/categories/hooks/useCategories'
 import type { AdminEstablishment } from '@/modules/admin/types'
 
@@ -69,6 +74,15 @@ export function EstablishmentFormDialog({
   )
 }
 
+function initials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('')
+}
+
 function EstablishmentForm({
   establishment,
   onSaved,
@@ -79,6 +93,8 @@ function EstablishmentForm({
   const isEdit = Boolean(establishment)
   const createEstablishment = useCreateEstablishment()
   const updateEstablishment = useUpdateEstablishment()
+  const uploadLogo = useUploadEstablishmentLogo()
+  const fileInput = useRef<HTMLInputElement>(null)
   const { data: categories = [] } = useCategories()
   const [profile, setProfile] = useState({
     name: establishment?.name ?? '',
@@ -89,8 +105,28 @@ function EstablishmentForm({
     is_active: establishment?.is_active ?? true,
   })
   const [address, setAddress] = useState<AddressValue>(() => addressFromEstablishment(establishment))
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   const patch = (partial: Partial<typeof profile>) => setProfile((prev) => ({ ...prev, ...partial }))
+
+  async function handleLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (isEdit && establishment) {
+      try {
+        await uploadLogo.mutateAsync({ id: establishment.id, file })
+      } catch (err) {
+        toast.error(getErrorMessage(err, 'Não foi possível enviar o logo. Use uma imagem de até 4 MB.'))
+      } finally {
+        if (fileInput.current) fileInput.current.value = ''
+      }
+    } else {
+      setLogoFile(file)
+      setLogoPreview(URL.createObjectURL(file))
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -126,6 +162,7 @@ function EstablishmentForm({
           description: profile.description || null,
           phone: profile.phone || null,
           is_active: profile.is_active,
+          logo: logoFile,
           ...addressPayload,
         })
       }
@@ -147,6 +184,42 @@ function EstablishmentForm({
             : 'Cria o perfil do estabelecimento parceiro. Os logins são criados depois, na tela de Usuários.'}
         </DialogDescription>
       </DialogHeader>
+
+      <div className="flex items-center gap-4 rounded-lg border border-border p-3">
+        <Avatar className="size-16">
+          {(logoPreview ?? establishment?.logo_url) && (
+            <AvatarImage src={logoPreview ?? establishment!.logo_url!} alt={profile.name} />
+          )}
+          <AvatarFallback>{initials(profile.name || 'E')}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm text-muted-foreground">
+            Logo exibido no perfil do estabelecimento. Só o admin pode alterá-lo.
+          </span>
+          <div>
+            <input
+              ref={fileInput}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleLogoChange}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={uploadLogo.isPending}
+              onClick={() => fileInput.current?.click()}
+            >
+              {uploadLogo.isPending
+                ? 'Enviando…'
+                : (logoPreview ?? establishment?.logo_url)
+                  ? 'Trocar logo'
+                  : 'Enviar logo'}
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
         <FormSection title="Dados do estabelecimento">

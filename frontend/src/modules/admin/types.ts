@@ -21,6 +21,7 @@ export interface AdminCompany {
   legal_name: string
   trade_name: string | null
   cnpj: string
+  logo_url: string | null
   phone: string | null
   contact_email: string | null
   cep: string | null
@@ -42,6 +43,7 @@ export interface AdminEstablishment {
   category_id: number | null
   category: { id: number; name: string } | null
   description: string | null
+  logo_url: string | null
   phone: string | null
   cep: string | null
   logradouro: string | null
@@ -85,9 +87,11 @@ export interface CreateCompanyPayload extends AddressFields {
   phone?: string | null
   contact_email?: string | null
   is_active?: boolean
+  /** Optional — only sent by the create form. Changing it later requires uploadLogo(). */
+  logo?: File | null
 }
 
-export type UpdateCompanyPayload = Partial<CreateCompanyPayload>
+export type UpdateCompanyPayload = Partial<Omit<CreateCompanyPayload, 'logo'>>
 
 export interface CreateEstablishmentPayload extends AddressFields {
   name: string
@@ -96,6 +100,8 @@ export interface CreateEstablishmentPayload extends AddressFields {
   description?: string | null
   phone?: string | null
   is_active?: boolean
+  /** Optional — only sent by the create form. Changing it later requires uploadLogo(). */
+  logo?: File | null
 }
 
-export type UpdateEstablishmentPayload = Partial<CreateEstablishmentPayload>
+export type UpdateEstablishmentPayload = Partial<Omit<CreateEstablishmentPayload, 'logo'>>

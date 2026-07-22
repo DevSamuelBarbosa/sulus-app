@@ -15,7 +15,7 @@ DNS + proxy/CDN + SSL.
 ```
 Cloudflare Pages ───────────────▶  Frontend (React/PWA — build estático)
 Cloudflare DNS/proxy ─▶ api.seudominio.com ─▶ VPS (DigitalOcean/Hetzner)
-                                               └─ Laravel + MySQL + Redis
+                                               └─ Laravel + PostgreSQL + Redis
 Cloudflare R2 ──────────────────▶  Fotos dos funcionários (bucket privado)
 ```
 
@@ -23,7 +23,7 @@ Cloudflare R2 ──────────────────▶  Fotos d
 |------|----------|---------|
 | Frontend (estático) | Cloudflare **Pages** | grátis |
 | Backend (Laravel/PHP) | VPS + **Laravel Forge** | ~US$6–12/mês + Forge US$12/mês |
-| Banco (MySQL) | No próprio VPS (início) → Managed DB depois | — |
+| Banco (PostgreSQL) | No próprio VPS (início) → Managed DB depois | — |
 | Cache/QR tokens (Redis) | No próprio VPS | — |
 | Storage de fotos | Cloudflare **R2** | 10 GB grátis |
 | E-mail transacional | **Resend** | 3.000 e-mails/mês grátis |
@@ -81,15 +81,15 @@ Com as credenciais no `.env`, o smoke test do upload:
 ## 2. Backend (Laravel) — VPS + Forge
 
 ### Recomendado: DigitalOcean (ou Hetzner) + Laravel Forge
-O Forge provisiona nginx + PHP-FPM + MySQL + Redis + SSL (Let's Encrypt) e faz
+O Forge provisiona nginx + PHP-FPM + PostgreSQL + Redis + SSL (Let's Encrypt) e faz
 deploy por `git push`. É o equivalente em produção do que o `docker-compose`
 faz localmente.
 
 ### Checklist do servidor
 - [ ] Criar droplet (Ubuntu LTS) e conectar no Forge.
 - [ ] Site apontando para `api.seudominio.com`, raiz em `backend/public`.
-- [ ] PHP 8.3, extensões: `pdo_mysql`, `redis`, `intl`, `bcmath`, `zip`.
-- [ ] Banco MySQL criado + usuário/senha.
+- [ ] PHP 8.3, extensões: `pdo_pgsql`, `redis`, `intl`, `bcmath`, `zip`.
+- [ ] Banco PostgreSQL criado + usuário/senha.
 - [ ] Redis ativo (QR tokens + cache).
 - [ ] Variáveis de ambiente de produção (ver seção 6).
 - [ ] Deploy script: `composer install --no-dev`, `php artisan migrate --force`,
@@ -106,7 +106,7 @@ faz localmente.
 
 ### DB e Redis
 No início rodam no próprio droplet (simples/barato). Depois, se quiser backup
-automático e HA, migrar o MySQL para um **Managed Database** da DigitalOcean.
+automático e HA, migrar o PostgreSQL para um **Managed Database** da DigitalOcean.
 
 ---
 
@@ -172,11 +172,13 @@ APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://api.seudominio.com
 
-DB_CONNECTION=mysql
+DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1          # ou host do managed DB
+DB_PORT=5432
 DB_DATABASE=sulus
 DB_USERNAME=...
 DB_PASSWORD=...
+# DB_SSLMODE=require        # exigido por alguns Postgres gerenciados (ex.: DO Managed DB)
 
 CACHE_STORE=redis
 REDIS_HOST=127.0.0.1
@@ -217,7 +219,7 @@ Lembrar de ajustar `config/cors.php` (`allowed_origins` via `FRONTEND_URL`).
 ---
 
 ## Ordem sugerida no dia do deploy
-1. Provisionar VPS (Forge) + MySQL + Redis.
+1. Provisionar VPS (Forge) + PostgreSQL + Redis.
 2. Configurar R2 e validar um upload real (seção 1).
 3. Configurar Resend (domínio verificado + SPF/DKIM) e subir o queue worker
    (seção 3) — sem isso o cadastro de funcionário fica sem enviar convite.

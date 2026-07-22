@@ -72,6 +72,16 @@ export function useDeleteCompany() {
   })
 }
 
+export function useUploadCompanyLogo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, file }: { id: number; file: File }) => adminApi.companies.uploadLogo(id, file),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'companies'] })
+    },
+  })
+}
+
 export function useAdminEstablishments(filters: AdminListFilters) {
   return useQuery({
     queryKey: ['admin', 'establishments', filters],
@@ -116,6 +126,16 @@ export function useDeleteEstablishment() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['admin', 'establishments'] })
       void queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] })
+    },
+  })
+}
+
+export function useUploadEstablishmentLogo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, file }: { id: number; file: File }) => adminApi.establishments.uploadLogo(id, file),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'establishments'] })
     },
   })
 }

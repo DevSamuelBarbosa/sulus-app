@@ -21,6 +21,12 @@ Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
         Route::apiResource('establishments', EstablishmentController::class);
         Route::apiResource('categories', CategoryController::class)->except(['show']);
 
+        // Logo changes are admin-only — companies/establishments can never
+        // touch their own logo via self-service (see App\Modules\Companies\
+        // Requests\UpdateCompanyProfileRequest, which intentionally omits it).
+        Route::post('companies/{company}/logo', [CompanyController::class, 'uploadLogo']);
+        Route::post('establishments/{establishment}/logo', [EstablishmentController::class, 'uploadLogo']);
+
         // Login management for a tenant — admin bypasses the tenant.permission
         // gate and password confirmation self-service requires (see
         // App\Modules\Admin\Controllers\CompanyUserController).

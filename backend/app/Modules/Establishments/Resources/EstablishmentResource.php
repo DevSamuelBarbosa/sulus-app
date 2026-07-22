@@ -31,6 +31,7 @@ class EstablishmentResource extends JsonResource
                 'name' => $this->category->name,
             ]),
             'description' => $this->description,
+            'logo_url' => $this->logoUrl(),
             'phone' => $this->phone,
             'cep' => $this->cep,
             'logradouro' => $this->logradouro,

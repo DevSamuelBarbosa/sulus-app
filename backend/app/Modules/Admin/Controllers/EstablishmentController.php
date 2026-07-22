@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Establishment;
 use App\Modules\Establishments\Requests\StoreEstablishmentRequest;
 use App\Modules\Establishments\Requests\UpdateEstablishmentRequest;
+use App\Modules\Establishments\Requests\UploadEstablishmentLogoRequest;
 use App\Modules\Establishments\Resources\EstablishmentResource;
 use App\Modules\Establishments\Services\EstablishmentService;
 use Illuminate\Http\Request;
@@ -66,5 +67,12 @@ class EstablishmentController extends Controller
         $this->establishments->delete($establishment);
 
         return response()->noContent();
+    }
+
+    public function uploadLogo(UploadEstablishmentLogoRequest $request, Establishment $establishment): EstablishmentResource
+    {
+        $this->establishments->updateLogo($establishment, $request->file('logo'));
+
+        return new EstablishmentResource($establishment->load(['masterUser', 'city.state', 'category']));
     }
 }

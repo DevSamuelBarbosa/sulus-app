@@ -29,6 +29,7 @@ class StoreCompanyRequest extends FormRequest
             'bairro' => ['nullable', 'string', 'max:255'],
             'city_id' => ['nullable', 'integer', 'exists:cities,id'],
             'is_active' => ['sometimes', 'boolean'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:'.config('media.photo_max_kb')],
         ];
     }
 }

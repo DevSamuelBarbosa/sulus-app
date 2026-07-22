@@ -8,6 +8,8 @@ use App\Models\Company;
 use App\Models\State;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -129,5 +131,50 @@ class AdminCompanyTest extends TestCase
         $this->deleteJson("/api/admin/companies/{$company->id}")->assertNoContent();
 
         $this->assertSoftDeleted('companies', ['id' => $company->id]);
+    }
+
+    public function test_admin_can_create_a_company_with_a_logo(): void
+    {
+        Storage::fake('public');
+        Sanctum::actingAs(User::factory()->admin()->create());
+
+        $response = $this->postJson('/api/admin/companies', [
+            'legal_name' => 'Empresa Com Logo LTDA',
+            'cnpj' => '22345678000199',
+            'logo' => UploadedFile::fake()->create('logo.jpg', 200, 'image/jpeg'),
+        ]);
+
+        $response->assertCreated();
+        $this->assertNotNull($response->json('data.logo_url'));
+
+        $company = Company::where('cnpj', '22345678000199')->firstOrFail();
+        Storage::disk('public')->assertExists($company->logo_path);
+    }
+
+    public function test_admin_can_change_a_companys_logo(): void
+    {
+        Storage::fake('public');
+        Sanctum::actingAs(User::factory()->admin()->create());
+        $company = Company::factory()->create();
+
+        $response = $this->postJson("/api/admin/companies/{$company->id}/logo", [
+            'logo' => UploadedFile::fake()->create('novo-logo.jpg', 200, 'image/jpeg'),
+        ]);
+
+        $response->assertOk();
+        $this->assertNotNull($response->json('data.logo_url'));
+
+        $company->refresh();
+        Storage::disk('public')->assertExists($company->logo_path);
+    }
+
+    public function test_non_admin_cannot_change_a_companys_logo(): void
+    {
+        Sanctum::actingAs(User::factory()->role(UserRole::Company)->create());
+        $company = Company::factory()->create();
+
+        $this->postJson("/api/admin/companies/{$company->id}/logo", [
+            'logo' => UploadedFile::fake()->create('novo-logo.jpg', 200, 'image/jpeg'),
+        ])->assertForbidden();
     }
 }

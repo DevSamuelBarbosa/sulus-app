@@ -26,6 +26,7 @@ class CompanyResource extends JsonResource
             'legal_name' => $this->legal_name,
             'trade_name' => $this->trade_name,
             'cnpj' => $this->cnpj,
+            'logo_url' => $this->logoUrl(),
             'phone' => $this->phone,
             'contact_email' => $this->email,
             'cep' => $this->cep,

@@ -3,13 +3,17 @@
 namespace App\Modules\Establishments\Services;
 
 use App\Models\Establishment;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class EstablishmentService
 {
     /**
      * Creates only the establishment profile — logins are created separately
      * via App\Modules\Auth\Services\TenantUserService (the first one created
-     * becomes the tenant's Master automatically).
+     * becomes the tenant's Master automatically). The logo is optional and,
+     * once set, can only be changed by an admin (see updateLogo()) — the
+     * tenant's own self-service profile never exposes this field.
      *
      * @param  array<string, mixed>  $data
      */
@@ -28,7 +32,27 @@ class EstablishmentService
             'bairro' => $data['bairro'] ?? null,
             'city_id' => $data['city_id'] ?? null,
             'is_active' => $data['is_active'] ?? true,
+            'logo_path' => isset($data['logo']) ? $data['logo']->store('establishments/logos', config('media.disk')) : null,
         ]);
+    }
+
+    /**
+     * Replaces the establishment's logo, deleting the previous file if present.
+     * Admin-only (see routes/api/admin.php) — mirrors EmployeeService::storePhoto().
+     */
+    public function updateLogo(Establishment $establishment, UploadedFile $logo): Establishment
+    {
+        $disk = Storage::disk(config('media.disk'));
+
+        $path = $logo->store('establishments/logos', config('media.disk'));
+
+        if ($establishment->logo_path) {
+            $disk->delete($establishment->logo_path);
+        }
+
+        $establishment->update(['logo_path' => $path]);
+
+        return $establishment;
     }
 
     /**

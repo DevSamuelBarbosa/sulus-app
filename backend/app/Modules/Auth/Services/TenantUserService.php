@@ -22,7 +22,7 @@ class TenantUserService
     public function list(Company|Establishment $tenant): Collection
     {
         return $tenant->users()
-            ->orderByRaw("FIELD(tenant_role, 'master', 'administrador', 'normal')")
+            ->orderByRaw("CASE tenant_role WHEN 'master' THEN 0 WHEN 'administrador' THEN 1 WHEN 'normal' THEN 2 END")
             ->orderBy('name')
             ->get();
     }

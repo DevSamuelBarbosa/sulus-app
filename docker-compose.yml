@@ -7,7 +7,7 @@ services:
     volumes:
       - ./backend:/var/www/html
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_started
@@ -23,7 +23,7 @@ services:
     volumes:
       - ./backend:/var/www/html
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_started
@@ -43,20 +43,19 @@ services:
     networks:
       - sulus
 
-  mysql:
-    image: mysql:8.4
-    container_name: sulus-mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: sulus-postgres
     ports:
-      - "3306:3306"
+      - "5433:5432" # host 5432 already taken by a system Postgres; app talks to the container via the Docker network anyway
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-sulus}
-      MYSQL_USER: ${DB_USERNAME:-sulus}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      POSTGRES_DB: ${DB_DATABASE:-sulus}
+      POSTGRES_USER: ${DB_USERNAME:-sulus}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
     volumes:
-      - mysql-data:/var/lib/mysql
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD:-root}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-sulus} -d ${DB_DATABASE:-sulus}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -85,4 +84,4 @@ networks:
     driver: bridge
 
 volumes:
-  mysql-data:
+  postgres-data:
