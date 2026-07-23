@@ -45,16 +45,17 @@ export function EmployeesPanel() {
   const setBenefit = useSetBenefitStatus()
   const restoreEmployee = useRestoreEmployee()
   const [formOpen, setFormOpen] = useState(false)
-  const [editing, setEditing] = useState<Employee | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [deleting, setDeleting] = useState<Employee | null>(null)
+  const editing = editingId ? (data?.data.find((e) => e.id === editingId) ?? null) : null
 
   function openCreate() {
-    setEditing(null)
+    setEditingId(null)
     setFormOpen(true)
   }
 
   function openEdit(employee: Employee) {
-    setEditing(employee)
+    setEditingId(employee.id)
     setFormOpen(true)
   }
 

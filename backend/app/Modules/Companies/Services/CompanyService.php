@@ -20,7 +20,7 @@ class CompanyService
      */
     public function create(array $data): Company
     {
-        return Company::create([
+        $company = Company::create([
             'legal_name' => $data['legal_name'],
             'trade_name' => $data['trade_name'] ?? null,
             'cnpj' => $data['cnpj'],
@@ -33,8 +33,13 @@ class CompanyService
             'bairro' => $data['bairro'] ?? null,
             'city_id' => $data['city_id'] ?? null,
             'is_active' => $data['is_active'] ?? true,
-            'logo_path' => isset($data['logo']) ? $data['logo']->store('companies/logos', config('media.disk')) : null,
         ]);
+
+        if (isset($data['logo'])) {
+            $this->updateLogo($company, $data['logo']);
+        }
+
+        return $company;
     }
 
     /**
@@ -45,7 +50,7 @@ class CompanyService
     {
         $disk = Storage::disk(config('media.disk'));
 
-        $path = $logo->store('companies/logos', config('media.disk'));
+        $path = $logo->store("companies/{$company->id}/logos", config('media.disk'));
 
         if ($company->logo_path) {
             $disk->delete($company->logo_path);

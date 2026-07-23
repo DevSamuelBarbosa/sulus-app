@@ -20,7 +20,7 @@ class EstablishmentService
      */
     public function create(array $data): Establishment
     {
-        return Establishment::create([
+        $establishment = Establishment::create([
             'name' => $data['name'],
             'cnpj' => $data['cnpj'],
             'category_id' => $data['category_id'] ?? null,
@@ -33,8 +33,13 @@ class EstablishmentService
             'bairro' => $data['bairro'] ?? null,
             'city_id' => $data['city_id'] ?? null,
             'is_active' => $data['is_active'] ?? true,
-            'logo_path' => isset($data['logo']) ? $data['logo']->store('establishments/logos', config('media.disk')) : null,
         ]);
+
+        if (isset($data['logo'])) {
+            $this->updateLogo($establishment, $data['logo']);
+        }
+
+        return $establishment;
     }
 
     /**
@@ -45,7 +50,7 @@ class EstablishmentService
     {
         $disk = Storage::disk(config('media.disk'));
 
-        $path = $logo->store('establishments/logos', config('media.disk'));
+        $path = $logo->store("establishments/{$establishment->id}/logos", config('media.disk'));
 
         if ($establishment->logo_path) {
             $disk->delete($establishment->logo_path);

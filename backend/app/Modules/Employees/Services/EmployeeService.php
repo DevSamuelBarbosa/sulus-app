@@ -81,7 +81,10 @@ class EmployeeService
     {
         $disk = Storage::disk(config('media.disk'));
 
-        $path = $photo->store('employees/photos', config('media.disk'));
+        $path = $photo->store(
+            "employees/{$employee->company_id}/{$employee->id}/photos",
+            config('media.disk'),
+        );
 
         if ($employee->photo_path) {
             $disk->delete($employee->photo_path);

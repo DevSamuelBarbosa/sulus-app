@@ -31,8 +31,9 @@ export function CompaniesPanel() {
   const { impersonate } = useAuth()
   const navigate = useNavigate()
   const [formOpen, setFormOpen] = useState(false)
-  const [editing, setEditing] = useState<AdminCompany | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [deleting, setDeleting] = useState<AdminCompany | null>(null)
+  const editing = editingId ? (data?.data.find((c) => c.id === editingId) ?? null) : null
 
   async function handleImpersonate(company: AdminCompany) {
     if (!company.master) return
@@ -41,12 +42,12 @@ export function CompaniesPanel() {
   }
 
   function openCreate() {
-    setEditing(null)
+    setEditingId(null)
     setFormOpen(true)
   }
 
   function openEdit(company: AdminCompany) {
-    setEditing(company)
+    setEditingId(company.id)
     setFormOpen(true)
   }
 

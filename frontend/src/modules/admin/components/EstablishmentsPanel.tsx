@@ -35,8 +35,9 @@ export function EstablishmentsPanel() {
   const { impersonate } = useAuth()
   const navigate = useNavigate()
   const [formOpen, setFormOpen] = useState(false)
-  const [editing, setEditing] = useState<AdminEstablishment | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [deleting, setDeleting] = useState<AdminEstablishment | null>(null)
+  const editing = editingId ? (data?.data.find((e) => e.id === editingId) ?? null) : null
 
   async function handleImpersonate(establishment: AdminEstablishment) {
     if (!establishment.master) return
@@ -45,12 +46,12 @@ export function EstablishmentsPanel() {
   }
 
   function openCreate() {
-    setEditing(null)
+    setEditingId(null)
     setFormOpen(true)
   }
 
   function openEdit(establishment: AdminEstablishment) {
-    setEditing(establishment)
+    setEditingId(establishment.id)
     setFormOpen(true)
   }
 
