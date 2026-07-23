@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios'
+import type { ApiError } from '@/shared/types'
 
 const TOKEN_KEY = 'sulus.token'
 
@@ -24,13 +25,26 @@ httpClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 httpClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
+  (error: AxiosError<ApiError>) => {
     if (error.response?.status === 401) {
       tokenStorage.clear()
       if (window.location.pathname !== '/login') {
         window.location.assign('/login')
       }
     }
+
+    // The tenant (company/establishment) can be deactivated or deleted
+    // mid-session — the backend re-checks this on every request (see
+    // EnsureRole::hasActiveProfile), not just at login, so an already-issued
+    // token can start failing this way at any point. Kick the user out the
+    // same way LoginPage already handles it for a fresh login attempt.
+    if (error.response?.status === 403 && error.response.data?.code === 'account_inactive') {
+      tokenStorage.clear()
+      if (window.location.pathname !== '/conta-desativada') {
+        window.location.assign('/conta-desativada')
+      }
+    }
+
     return Promise.reject(error)
   },
 )

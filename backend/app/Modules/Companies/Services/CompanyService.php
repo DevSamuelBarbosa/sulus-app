@@ -4,6 +4,7 @@ namespace App\Modules\Companies\Services;
 
 use App\Models\Company;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class CompanyService
@@ -74,8 +75,17 @@ class CompanyService
         return $company;
     }
 
+    /**
+     * Deactivates every login of the tenant before soft-deleting the company
+     * — a deleted company can't be left with working logins (EnsureRole
+     * rejects requests from an inactive user, and AuthService::login()
+     * blocks new sessions the same way).
+     */
     public function delete(Company $company): void
     {
-        $company->delete();
+        DB::transaction(function () use ($company) {
+            $company->users()->update(['is_active' => false]);
+            $company->delete();
+        });
     }
 }

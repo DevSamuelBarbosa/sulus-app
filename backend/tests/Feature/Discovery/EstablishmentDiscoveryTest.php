@@ -5,6 +5,7 @@ namespace Tests\Feature\Discovery;
 use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\City;
+use App\Models\Company;
 use App\Models\Establishment;
 use App\Models\State;
 use App\Models\User;
@@ -43,7 +44,10 @@ class EstablishmentDiscoveryTest extends TestCase
 
     public function test_company_can_search_establishments_by_name(): void
     {
-        Sanctum::actingAs(User::factory()->role(UserRole::Company)->create());
+        // A company-role login only authenticates when linked to an active
+        // company (see User::hasActiveProfile()) — use a properly linked one
+        // rather than a bare role=company user with no company_id.
+        Sanctum::actingAs(Company::factory()->create()->masterUser);
 
         Establishment::factory()->create(['name' => 'Farmácia Central']);
         Establishment::factory()->create(['name' => 'Padaria do Bairro']);

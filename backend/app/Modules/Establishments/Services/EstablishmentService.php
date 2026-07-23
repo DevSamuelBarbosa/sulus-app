@@ -4,6 +4,7 @@ namespace App\Modules\Establishments\Services;
 
 use App\Models\Establishment;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class EstablishmentService
@@ -70,8 +71,17 @@ class EstablishmentService
         return $establishment;
     }
 
+    /**
+     * Deactivates every login of the tenant before soft-deleting the
+     * establishment — a deleted establishment can't be left with working
+     * logins (EnsureRole rejects requests from an inactive user, and
+     * AuthService::login() blocks new sessions the same way).
+     */
     public function delete(Establishment $establishment): void
     {
-        $establishment->delete();
+        DB::transaction(function () use ($establishment) {
+            $establishment->users()->update(['is_active' => false]);
+            $establishment->delete();
+        });
     }
 }

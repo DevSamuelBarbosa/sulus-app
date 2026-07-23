@@ -92,10 +92,13 @@ class AdminEstablishmentTest extends TestCase
     {
         Sanctum::actingAs(User::factory()->admin()->create());
         $establishment = Establishment::factory()->create();
+        $master = $establishment->masterUser;
 
         $this->deleteJson("/api/admin/establishments/{$establishment->id}")->assertNoContent();
 
         $this->assertSoftDeleted('establishments', ['id' => $establishment->id]);
+        // A deleted establishment can't be left with working logins.
+        $this->assertDatabaseHas('users', ['id' => $master->id, 'is_active' => false]);
     }
 
     public function test_admin_stats_endpoint_returns_counts(): void

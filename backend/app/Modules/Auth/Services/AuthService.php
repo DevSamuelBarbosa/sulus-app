@@ -2,7 +2,6 @@
 
 namespace App\Modules\Auth\Services;
 
-use App\Enums\UserRole;
 use App\Models\User;
 use App\Modules\Auth\Exceptions\AccountInactiveException;
 use Illuminate\Support\Facades\Hash;
@@ -25,26 +24,16 @@ class AuthService
             ]);
         }
 
-        if (! $user->is_active || $this->profileIsDeactivated($user)) {
+        // See User::hasActiveProfile() — same check EnsureRole re-runs on
+        // every subsequent request, so a tenant deactivated/deleted after
+        // login can't keep using an already-issued token either.
+        if (! $user->is_active || ! $user->hasActiveProfile()) {
             throw new AccountInactiveException;
         }
 
         $token = $user->createToken('pwa', $user->role->abilities())->plainTextToken;
 
         return ['token' => $token, 'user' => $user];
-    }
-
-    /**
-     * Companies/establishments deactivated by the admin (business status,
-     * distinct from the user's own is_active login flag) must not log in.
-     */
-    private function profileIsDeactivated(User $user): bool
-    {
-        if (! in_array($user->role, [UserRole::Company, UserRole::Establishment], true)) {
-            return false;
-        }
-
-        return $user->profile()?->is_active === false;
     }
 
     public function logout(User $user): void

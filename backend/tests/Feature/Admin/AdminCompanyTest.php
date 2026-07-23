@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\TenantRole;
 use App\Enums\UserRole;
 use App\Models\City;
 use App\Models\Company;
@@ -127,10 +128,34 @@ class AdminCompanyTest extends TestCase
     {
         Sanctum::actingAs(User::factory()->admin()->create());
         $company = Company::factory()->create();
+        $master = $company->masterUser;
 
         $this->deleteJson("/api/admin/companies/{$company->id}")->assertNoContent();
 
         $this->assertSoftDeleted('companies', ['id' => $company->id]);
+        // A deleted company can't be left with working logins.
+        $this->assertDatabaseHas('users', ['id' => $master->id, 'is_active' => false]);
+    }
+
+    public function test_deleting_a_company_deactivates_every_login_not_just_the_master(): void
+    {
+        Sanctum::actingAs(User::factory()->admin()->create());
+        $company = Company::factory()->create();
+        $master = $company->masterUser;
+        $administrador = User::factory()->for($company)->create([
+            'role' => UserRole::Company,
+            'tenant_role' => TenantRole::Administrador,
+        ]);
+        $normal = User::factory()->for($company)->create([
+            'role' => UserRole::Company,
+            'tenant_role' => TenantRole::Normal,
+        ]);
+
+        $this->deleteJson("/api/admin/companies/{$company->id}")->assertNoContent();
+
+        $this->assertDatabaseHas('users', ['id' => $master->id, 'is_active' => false]);
+        $this->assertDatabaseHas('users', ['id' => $administrador->id, 'is_active' => false]);
+        $this->assertDatabaseHas('users', ['id' => $normal->id, 'is_active' => false]);
     }
 
     public function test_admin_can_create_a_company_with_a_logo(): void

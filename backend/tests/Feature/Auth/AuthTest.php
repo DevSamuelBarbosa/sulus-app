@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Enums\UserRole;
 use App\Models\Company;
 use App\Models\Establishment;
 use App\Models\User;
@@ -87,9 +86,42 @@ class AuthTest extends TestCase
         ])->assertOk();
     }
 
+    public function test_deleted_companys_master_cannot_login(): void
+    {
+        $company = Company::factory()->create();
+        $email = $company->masterUser->email;
+
+        // Soft-deleting the company directly (bypassing CompanyService::delete())
+        // must still block login — a trashed company resolves to a null
+        // profile(), which AuthService::profileIsDeactivated() must treat as
+        // deactivated rather than skip.
+        $company->delete();
+
+        $this->postJson('/api/auth/login', [
+            'email' => $email,
+            'password' => 'password',
+        ])->assertForbidden()->assertJsonPath('code', 'account_inactive');
+    }
+
+    public function test_deleted_establishments_master_cannot_login(): void
+    {
+        $establishment = Establishment::factory()->create();
+        $email = $establishment->masterUser->email;
+
+        $establishment->delete();
+
+        $this->postJson('/api/auth/login', [
+            'email' => $email,
+            'password' => 'password',
+        ])->assertForbidden()->assertJsonPath('code', 'account_inactive');
+    }
+
     public function test_authenticated_user_can_fetch_me(): void
     {
-        $user = User::factory()->role(UserRole::Company)->create();
+        // A company-role login only authenticates when linked to an active
+        // company (see profileIsDeactivated()) — use a properly linked one
+        // rather than a bare role=company user with no company_id.
+        $user = Company::factory()->create()->masterUser;
 
         $token = $this->loginToken($user);
 
@@ -103,6 +135,46 @@ class AuthTest extends TestCase
     public function test_guest_cannot_fetch_me(): void
     {
         $this->getJson('/api/auth/me')->assertUnauthorized();
+    }
+
+    public function test_deactivating_a_company_mid_session_kicks_out_an_already_issued_token(): void
+    {
+        $company = Company::factory()->create(['is_active' => true]);
+        $master = $company->masterUser;
+        $token = $this->loginToken($master);
+
+        // The token still works right after login.
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/api/company/profile')
+            ->assertOk();
+
+        $company->update(['is_active' => false]);
+        // Laravel's Sanctum guard caches the resolved user for the lifetime
+        // of the test's container — force it to re-resolve on the next
+        // simulated request, exactly like a real second HTTP request would.
+        $this->app['auth']->forgetGuards();
+
+        // Same token, same session — but the tenant is now deactivated, so
+        // EnsureRole must block it immediately, not just future logins.
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/api/company/profile')
+            ->assertForbidden()
+            ->assertJsonPath('code', 'account_inactive');
+    }
+
+    public function test_deleting_a_company_mid_session_kicks_out_an_already_issued_token(): void
+    {
+        $company = Company::factory()->create();
+        $master = $company->masterUser;
+        $token = $this->loginToken($master);
+
+        $company->delete();
+        $this->app['auth']->forgetGuards();
+
+        $this->withHeader('Authorization', "Bearer {$token}")
+            ->getJson('/api/company/profile')
+            ->assertForbidden()
+            ->assertJsonPath('code', 'account_inactive');
     }
 
     public function test_logout_revokes_the_token(): void

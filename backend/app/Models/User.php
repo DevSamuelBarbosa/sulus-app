@@ -92,6 +92,25 @@ class User extends Authenticatable
         return $this->role === $role;
     }
 
+    /**
+     * For company/establishment logins, the login only stays usable while
+     * its business profile is active and not deleted — a soft-deleted
+     * profile resolves to null here (belongsTo excludes trashed rows),
+     * which must count as inactive rather than being skipped. Other roles
+     * (admin, employee) aren't gated by this; their own is_active flag is
+     * authoritative. Checked both at login (AuthService) and on every
+     * subsequent request (EnsureRole), so deactivating/deleting a tenant
+     * kicks out already-active sessions immediately, not just new logins.
+     */
+    public function hasActiveProfile(): bool
+    {
+        if (! in_array($this->role, [UserRole::Company, UserRole::Establishment], true)) {
+            return true;
+        }
+
+        return (bool) $this->profile()?->is_active;
+    }
+
     public function isTenantMaster(): bool
     {
         return $this->tenant_role === TenantRole::Master;
