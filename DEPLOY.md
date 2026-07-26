@@ -22,9 +22,9 @@ Cloudflare R2 ──────────────────▶  Fotos d
 | Peça | Onde vai | Serviço |
 |------|----------|---------|
 | Frontend (estático) | Cloudflare **Pages** | grátis |
-| Backend (Laravel/PHP) | VPS + **Laravel Forge** | ~US$6–12/mês + Forge US$12/mês |
-| Banco (PostgreSQL) | No próprio VPS (início) → Managed DB depois | — |
-| Cache/QR tokens (Redis) | No próprio VPS | — |
+| Backend (Laravel/PHP) | VPS + **Docker Compose** (`prod-docker-compose.yml`) | ~US$6–12/mês |
+| Banco (PostgreSQL) | Container no próprio VPS (início) → Managed DB depois | — |
+| Cache/QR tokens (Redis) | Container no próprio VPS | — |
 | Storage de fotos | Cloudflare **R2** | 10 GB grátis |
 | E-mail transacional | **Resend** | 3.000 e-mails/mês grátis |
 | DNS / CDN / SSL | Cloudflare | grátis |
@@ -78,35 +78,53 @@ Com as credenciais no `.env`, o smoke test do upload:
 
 ---
 
-## 2. Backend (Laravel) — VPS + Forge
+## 2. Backend (Laravel) — VPS + Docker Compose
 
-### Recomendado: DigitalOcean (ou Hetzner) + Laravel Forge
-O Forge provisiona nginx + PHP-FPM + PostgreSQL + Redis + SSL (Let's Encrypt) e faz
-deploy por `git push`. É o equivalente em produção do que o `docker-compose`
-faz localmente.
+### Recomendado: DigitalOcean (ou Hetzner) + `prod-docker-compose.yml`
+Sem Forge: o próprio `prod-docker-compose.yml` do repo sobe nginx + PHP-FPM +
+PostgreSQL + Redis + queue worker, cada um em um container, com `restart:
+unless-stopped` — é o equivalente em produção do que o `dev-docker-compose.yml`
+faz localmente, só que sem Mailpit, sem portas de banco/Redis expostas ao
+host, e com volumes nomeados próprios (`postgres-data-prod`, `redis-data-prod`).
 
 ### Checklist do servidor
-- [ ] Criar droplet (Ubuntu LTS) e conectar no Forge.
-- [ ] Site apontando para `api.seudominio.com`, raiz em `backend/public`.
-- [ ] PHP 8.3, extensões: `pdo_pgsql`, `redis`, `intl`, `bcmath`, `zip`.
-- [ ] Banco PostgreSQL criado + usuário/senha.
-- [ ] Redis ativo (QR tokens + cache).
-- [ ] Variáveis de ambiente de produção (ver seção 6).
-- [ ] Deploy script: `composer install --no-dev`, `php artisan migrate --force`,
-      `php artisan config:cache route:cache event:cache`, `php artisan storage:link`.
+- [ ] Criar droplet (Ubuntu LTS), instalar Docker Engine + plugin
+      `docker compose`.
+- [ ] `git clone` do repo no droplet (ex.: `/srv/sulus-app`).
+- [ ] Copiar `backend/.env.production` pro servidor e preencher **todos** os
+      valores (`APP_KEY`, `DB_USERNAME`/`DB_PASSWORD`, `REDIS_PASSWORD`, R2,
+      Resend — ver seção 6). Esse arquivo alimenta tanto os containers
+      `app`/`queue` quanto as credenciais dos containers `postgres`/`redis`
+      (ver comentário no topo do próprio arquivo).
+- [ ] Subir a stack:
+      ```bash
+      docker compose -f prod-docker-compose.yml --env-file backend/.env.production up -d --build
+      ```
+- [ ] Rodar migrations + otimizações + link de storage:
+      ```bash
+      docker compose -f prod-docker-compose.yml exec app php artisan migrate --force
+      docker compose -f prod-docker-compose.yml exec app php artisan config:cache route:cache event:cache
+      docker compose -f prod-docker-compose.yml exec app php artisan storage:link
+      ```
 - [ ] Seed inicial **apenas** de dados canônicos: `db:seed --class=StateSeeder`,
       `CitySeeder`, `CategorySeeder`. **Não** rodar `DemoSeeder` em produção.
-- [ ] SSL emitido; forçar HTTPS.
+- [ ] SSL: ver seção 7 — sem Forge não há Let's Encrypt automático; usar
+      Cloudflare Origin Certificate no nginx (modo Full strict) ou, como
+      atalho inicial, Cloudflare em modo Flexible.
 - [ ] **Queue worker obrigatório** (não é mais opcional): o convite de e-mail do
       funcionário (`App\Mail\EmployeeInviteMail`) é `ShouldQueue`, então sem um
       worker rodando o e-mail nunca sai — fica parado na tabela `jobs` pra
-      sempre. No Forge: aba **Daemons** → adicionar
-      `php artisan queue:work --tries=3 --sleep=1` (reinicia sozinho se cair).
-      Sem Forge: `supervisor` rodando o mesmo comando.
+      sempre. Aqui isso já é o serviço `queue` do compose, com
+      `restart: unless-stopped` — não precisa de Supervisor/Daemon separado.
+- [ ] Redeploy em mudanças futuras: `git pull` no droplet seguido de
+      `docker compose -f prod-docker-compose.yml --env-file backend/.env.production up -d --build`.
 
 ### DB e Redis
-No início rodam no próprio droplet (simples/barato). Depois, se quiser backup
-automático e HA, migrar o PostgreSQL para um **Managed Database** da DigitalOcean.
+No início rodam como containers no próprio droplet (simples/barato, dados em
+volumes Docker nomeados). Depois, se quiser backup automático e HA, trocar o
+serviço `postgres` do compose por um **Managed Database** da DigitalOcean
+(só muda `DB_HOST`/`DB_PORT`/`DB_SSLMODE` no `.env.production`, sem tocar no
+código).
 
 ---
 
@@ -114,7 +132,7 @@ automático e HA, migrar o PostgreSQL para um **Managed Database** da DigitalOce
 
 Usado hoje só para o convite de ativação do funcionário
 (`App\Mail\EmployeeInviteMail`, enviado por `EmployeeActivationService`). Em
-dev local isso cai no **Mailpit** (`docker-compose.yml`, UI em
+dev local isso cai no **Mailpit** (`dev-docker-compose.yml`, UI em
 `localhost:8025`) — em produção precisa de um provedor de verdade.
 
 O transporte `resend` já vem pronto no Laravel (`config/mail.php` +
@@ -173,7 +191,7 @@ APP_DEBUG=false
 APP_URL=https://api.seudominio.com
 
 DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1          # ou host do managed DB
+DB_HOST=postgres           # nome do serviço no prod-docker-compose.yml; host/IP se usar managed DB
 DB_PORT=5432
 DB_DATABASE=sulus
 DB_USERNAME=...
@@ -181,7 +199,8 @@ DB_PASSWORD=...
 # DB_SSLMODE=require        # exigido por alguns Postgres gerenciados (ex.: DO Managed DB)
 
 CACHE_STORE=redis
-REDIS_HOST=127.0.0.1
+REDIS_HOST=redis           # nome do serviço no prod-docker-compose.yml
+REDIS_PASSWORD=...         # obrigatório — usado também pelo container redis (--requirepass)
 QUEUE_CONNECTION=redis     # precisa do worker rodando — ver checklist da seção 2
 
 # Storage R2 — ver seção 1
@@ -212,14 +231,21 @@ Lembrar de ajustar `config/cors.php` (`allowed_origins` via `FRONTEND_URL`).
 ## 7. Cloudflare na frente do backend
 
 - [ ] DNS de `api.seudominio.com` → IP do droplet, **proxy ligado** (nuvem laranja).
-- [ ] SSL/TLS mode: **Full (strict)** (SSL válido no droplet via Forge).
+- [ ] SSL/TLS mode: **Full (strict)**. Sem Forge não há Let's Encrypt
+      automático — gerar um **Cloudflare Origin Certificate** (painel
+      **SSL/TLS → Origin Server**), montar `cert.pem`/`key.pem` no container
+      `nginx` (volume + bloco `listen 443 ssl` no `docker/nginx/default.conf`)
+      e liberar a porta 443 no `prod-docker-compose.yml`. Enquanto o domínio
+      não está pronto, dá pra começar em modo **Flexible** (sem cert no
+      droplet) e trocar pra Full strict quando o Origin Certificate estiver
+      instalado.
 - [ ] Atenção ao limite de tamanho de upload do proxy (100 MB no free — ok para
       fotos de até 4 MB) e a timeouts de requisições longas.
 
 ---
 
 ## Ordem sugerida no dia do deploy
-1. Provisionar VPS (Forge) + PostgreSQL + Redis.
+1. Provisionar VPS (Docker + `prod-docker-compose.yml`, seção 2).
 2. Configurar R2 e validar um upload real (seção 1).
 3. Configurar Resend (domínio verificado + SPF/DKIM) e subir o queue worker
    (seção 3) — sem isso o cadastro de funcionário fica sem enviar convite.

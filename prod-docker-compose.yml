@@ -1,0 +1,93 @@
+services:
+  app:
+    build:
+      context: ./docker/php
+    container_name: sulus-app-prod
+    working_dir: /var/www/html
+    restart: unless-stopped
+    volumes:
+      - ./backend:/var/www/html
+    env_file:
+      - ./backend/.env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - sulus-prod
+
+  queue:
+    build:
+      context: ./docker/php
+    container_name: sulus-queue-prod
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work --tries=3 --sleep=1
+    volumes:
+      - ./backend:/var/www/html
+    env_file:
+      - ./backend/.env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - sulus-prod
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: sulus-nginx-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./backend:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - sulus-prod
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: sulus-postgres-prod
+    restart: unless-stopped
+    # No host port published — only reachable from other containers on
+    # sulus-prod, unlike dev's 5433:5432. Values come from the same
+    # backend/.env.production loaded via `--env-file` (see DEPLOY.md §2).
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres-data-prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sulus-prod
+
+  redis:
+    image: redis:7-alpine
+    container_name: sulus-redis-prod
+    restart: unless-stopped
+    # No host port published (dev exposes 6379 for local debugging; prod
+    # doesn't need to). Auth required since queue jobs (e-mail de convite)
+    # and cache/QR tokens live here — set REDIS_PASSWORD before deploying.
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data-prod:/data
+    networks:
+      - sulus-prod
+
+networks:
+  sulus-prod:
+    driver: bridge
+
+volumes:
+  postgres-data-prod:
+  redis-data-prod:
