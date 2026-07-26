@@ -4,6 +4,7 @@ import { useAuth } from '@/modules/auth/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   AlertDialog,
@@ -17,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { RowActionsMenu } from '@/shared/components/RowActionsMenu'
 import { LocationFilter } from '@/modules/discovery/components/LocationFilter'
+import { initials } from '@/lib/utils'
 import { useAdminCompanies, useDeleteCompany, useUpdateCompany } from '@/modules/admin/hooks/useAdmin'
 import { CompanyFormDialog } from '@/modules/admin/components/CompanyFormDialog'
 import type { AdminCompany } from '@/modules/admin/types'
@@ -102,8 +104,18 @@ export function CompaniesPanel() {
             {data?.data.map((company) => (
               <TableRow key={company.id}>
                 <TableCell>
-                  <div className="font-medium">{company.trade_name || company.legal_name}</div>
-                  <div className="text-xs text-muted-foreground">{company.master?.email ?? 'Sem login'}</div>
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      {company.logo_url && (
+                        <AvatarImage src={company.logo_url} alt={company.trade_name || company.legal_name} />
+                      )}
+                      <AvatarFallback>{initials(company.trade_name || company.legal_name)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{company.trade_name || company.legal_name}</div>
+                      <div className="text-xs text-muted-foreground">{company.master?.email ?? 'Sem login'}</div>
+                    </div>
+                  </div>
                 </TableCell>
                 <TableCell>{company.cnpj}</TableCell>
                 <TableCell>{company.city ? `${company.city.name}/${company.city.uf}` : '—'}</TableCell>

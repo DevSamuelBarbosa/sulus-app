@@ -4,6 +4,7 @@ import { useAuth } from '@/modules/auth/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   AlertDialog,
@@ -17,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { RowActionsMenu } from '@/shared/components/RowActionsMenu'
 import { LocationFilter } from '@/modules/discovery/components/LocationFilter'
+import { initials } from '@/lib/utils'
 import {
   useAdminEstablishments,
   useDeleteEstablishment,
@@ -107,9 +109,19 @@ export function EstablishmentsPanel() {
             {data?.data.map((establishment) => (
               <TableRow key={establishment.id}>
                 <TableCell>
-                  <div className="font-medium">{establishment.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {establishment.master?.email ?? 'Sem login'}
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      {establishment.logo_url && (
+                        <AvatarImage src={establishment.logo_url} alt={establishment.name} />
+                      )}
+                      <AvatarFallback>{initials(establishment.name)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{establishment.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {establishment.master?.email ?? 'Sem login'}
+                      </div>
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>{establishment.cnpj}</TableCell>
