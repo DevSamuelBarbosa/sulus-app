@@ -27,8 +27,9 @@ class CompanyDiscoveryController extends Controller
             ->where('is_active', true)
             ->with('city.state')
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
-                $q->where('legal_name', 'like', "%{$search}%")
-                    ->orWhere('trade_name', 'like', "%{$search}%");
+                $like = '%'.mb_strtolower($search).'%';
+                $q->whereRaw('LOWER(legal_name) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(trade_name) LIKE ?', [$like]);
             }))
             ->when($validated['city_id'] ?? null, fn ($q, $cityId) => $q->where('city_id', $cityId))
             ->when($validated['state_id'] ?? null, fn ($q, $stateId) => $q->whereHas(

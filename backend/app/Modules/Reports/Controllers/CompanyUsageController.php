@@ -23,7 +23,9 @@ class CompanyUsageController extends Controller
             ->with('establishment:id,name')
             ->when(
                 $validated['search'] ?? null,
-                fn ($q, $search) => $q->where('employee_name_snapshot', 'like', "%{$search}%"),
+                fn ($q, $search) => $q->whereRaw(
+                    'LOWER(employee_name_snapshot) LIKE ?', ['%'.mb_strtolower($search).'%'],
+                ),
             )
             ->when($validated['employee_id'] ?? null, fn ($q, $id) => $q->where('employee_id', $id))
             ->when($validated['from'] ?? null, fn ($q, $from) => $q->where('used_at', '>=', $from))

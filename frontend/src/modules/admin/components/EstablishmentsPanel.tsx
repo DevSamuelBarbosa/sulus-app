@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/modules/auth/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -61,13 +62,17 @@ export function EstablishmentsPanel() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-          <Input
-            placeholder="Buscar por nome ou CNPJ…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-64"
-          />
+        <div className="flex flex-wrap items-end gap-2 sm:shrink-0">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="establishments-search">Buscar</Label>
+            <Input
+              id="establishments-search"
+              placeholder="Nome ou CNPJ…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-64"
+            />
+          </div>
           <LocationFilter
             stateId={stateId}
             cityId={cityId}
@@ -75,6 +80,7 @@ export function EstablishmentsPanel() {
               setStateId(next.stateId)
               setCityId(next.cityId)
             }}
+            showLabels
           />
         </div>
         <Button onClick={openCreate}>Novo estabelecimento</Button>

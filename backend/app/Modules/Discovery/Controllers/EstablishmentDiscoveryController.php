@@ -30,8 +30,9 @@ class EstablishmentDiscoveryController extends Controller
             ->where('is_active', true)
             ->with(['category', 'city.state'])
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                $like = '%'.mb_strtolower($search).'%';
+                $q->whereRaw('LOWER(name) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(description) LIKE ?', [$like]);
             }))
             ->when($validated['category_id'] ?? null, fn ($q, $categoryId) => $q->where('category_id', $categoryId))
             ->when($validated['city_id'] ?? null, fn ($q, $cityId) => $q->where('city_id', $cityId))

@@ -4,6 +4,7 @@ import { initials } from '@/lib/utils'
 import { formatDocument } from '@/shared/lib/masks'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -72,24 +73,31 @@ export function EmployeesPanel() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-          <Input
-            placeholder="Buscar por nome, CPF ou CNPJ…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-64"
-          />
-          <Select value={status || 'all'} onValueChange={(v) => setStatus(v === 'all' ? '' : v)}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="active">Ativos</SelectItem>
-              <SelectItem value="cancelled">Cancelados</SelectItem>
-              <SelectItem value="removed">Removidos</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex flex-wrap items-end gap-2 sm:shrink-0">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="employees-search">Buscar</Label>
+            <Input
+              id="employees-search"
+              placeholder="Nome, CPF ou CNPJ…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-64"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="employees-status">Status</Label>
+            <Select value={status || 'all'} onValueChange={(v) => setStatus(v === 'all' ? '' : v)}>
+              <SelectTrigger id="employees-status" className="w-40">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="active">Ativos</SelectItem>
+                <SelectItem value="cancelled">Cancelados</SelectItem>
+                <SelectItem value="removed">Removidos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <LocationFilter
             stateId={stateId}
             cityId={cityId}
@@ -97,6 +105,7 @@ export function EmployeesPanel() {
               setStateId(next.stateId)
               setCityId(next.cityId)
             }}
+            showLabels
           />
         </div>
         <Button onClick={openCreate}>Novo funcionário</Button>

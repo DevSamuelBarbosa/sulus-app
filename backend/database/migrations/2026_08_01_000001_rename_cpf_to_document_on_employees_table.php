@@ -7,19 +7,27 @@ use Illuminate\Support\Facades\DB;
  * Employees can now be identified by CPF (11 digits) or CNPJ (14
  * alphanumeric chars, for pessoa jurídica employees) — see
  * StoreEmployeeRequest. Raw SQL is used instead of Schema::change()/
- * renameColumn() since doctrine/dbal isn't installed in this app.
+ * renameColumn() since doctrine/dbal isn't installed in this app. The
+ * column-widening step is Postgres-only SQL syntax and also unnecessary on
+ * SQLite (used by the test suite), which doesn't enforce VARCHAR length.
  */
 return new class extends Migration
 {
     public function up(): void
     {
         DB::statement('ALTER TABLE employees RENAME COLUMN cpf TO document');
-        DB::statement('ALTER TABLE employees ALTER COLUMN document TYPE VARCHAR(14)');
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE employees ALTER COLUMN document TYPE VARCHAR(14)');
+        }
     }
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE employees ALTER COLUMN document TYPE VARCHAR(11)');
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE employees ALTER COLUMN document TYPE VARCHAR(11)');
+        }
+
         DB::statement('ALTER TABLE employees RENAME COLUMN document TO cpf');
     }
 };

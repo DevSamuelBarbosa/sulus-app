@@ -20,8 +20,9 @@ class EstablishmentUsageController extends Controller
 
         $usages = $request->user()->establishment->benefitUsages()
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
-                $q->where('employee_name_snapshot', 'like', "%{$search}%")
-                    ->orWhere('company_name_snapshot', 'like', "%{$search}%");
+                $like = '%'.mb_strtolower($search).'%';
+                $q->whereRaw('LOWER(employee_name_snapshot) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(company_name_snapshot) LIKE ?', [$like]);
             }))
             ->when($validated['from'] ?? null, fn ($q, $from) => $q->where('used_at', '>=', $from))
             ->when($validated['to'] ?? null, fn ($q, $to) => $q->where('used_at', '<=', $to))

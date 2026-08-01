@@ -29,9 +29,10 @@ class CompanyController extends Controller
         $companies = Company::query()
             ->with(['masterUser', 'city.state'])
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
-                $q->where('legal_name', 'like', "%{$search}%")
-                    ->orWhere('trade_name', 'like', "%{$search}%")
-                    ->orWhere('cnpj', 'like', "%{$search}%");
+                $like = '%'.mb_strtolower($search).'%';
+                $q->whereRaw('LOWER(legal_name) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(trade_name) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(cnpj) LIKE ?', [$like]);
             }))
             ->when($validated['city_id'] ?? null, fn ($q, $cityId) => $q->where('city_id', $cityId))
             ->when(

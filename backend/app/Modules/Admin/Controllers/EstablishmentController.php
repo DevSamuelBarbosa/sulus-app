@@ -29,8 +29,9 @@ class EstablishmentController extends Controller
         $establishments = Establishment::query()
             ->with(['masterUser', 'city.state', 'category'])
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('cnpj', 'like', "%{$search}%");
+                $like = '%'.mb_strtolower($search).'%';
+                $q->whereRaw('LOWER(name) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(cnpj) LIKE ?', [$like]);
             }))
             ->when($validated['city_id'] ?? null, fn ($q, $cityId) => $q->where('city_id', $cityId))
             ->when(

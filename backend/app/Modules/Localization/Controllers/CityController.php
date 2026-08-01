@@ -24,7 +24,9 @@ class CityController extends Controller
         $cities = City::query()
             ->with('state:id,uf')
             ->when($validated['state_id'] ?? null, fn ($q, $stateId) => $q->where('state_id', $stateId))
-            ->when($validated['search'] ?? null, fn ($q, $search) => $q->where('name', 'like', "{$search}%"))
+            ->when($validated['search'] ?? null, fn ($q, $search) => $q->whereRaw(
+                'LOWER(name) LIKE ?', [mb_strtolower($search).'%'],
+            ))
             ->orderBy('name')
             ->limit(50)
             ->get();

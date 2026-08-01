@@ -41,8 +41,9 @@ class EmployeeController extends Controller
         $employees = $query
             ->with(['user:id,email', 'city.state'])
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
-                $q->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('document', 'like', "%{$search}%");
+                $like = '%'.mb_strtolower($search).'%';
+                $q->whereRaw('LOWER(full_name) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(document) LIKE ?', [$like]);
             }))
             ->when(
                 $status && $status !== 'removed',
