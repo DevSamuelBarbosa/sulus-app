@@ -4,13 +4,19 @@ interface RankedListCardProps {
   title: string
   items: { name: string; count: number }[] | undefined
   emptyLabel?: string
+  totalCount?: number
 }
 
-export function RankedListCard({ title, items, emptyLabel = 'Sem dados ainda.' }: RankedListCardProps) {
+export function RankedListCard({ title, items, emptyLabel = 'Sem dados ainda.', totalCount }: RankedListCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="flex items-baseline justify-between gap-2 text-sm font-medium text-muted-foreground">
+          <span>{title}</span>
+          {totalCount !== undefined && (
+            <span className="shrink-0 font-normal">{totalCount} no total</span>
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {items && items.length > 0 ? (

@@ -20,13 +20,16 @@ export function EstablishmentHistoryPage() {
         <p className="text-muted-foreground">Clientes que utilizaram o benefício no seu estabelecimento.</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard label="Total de utilizações" value={report?.total_usages} />
         <StatCard label="Utilizações no mês" value={report?.usages_this_month} />
-        <StatCard label="Empresas parceiras" value={report?.unique_companies_count} accent />
       </div>
 
-      <RankedListCard title="Empresas com mais utilizações" items={report?.top_companies} />
+      <RankedListCard
+        title="Empresas com mais utilizações"
+        items={report?.top_companies}
+        totalCount={report?.unique_companies_count}
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <Input
