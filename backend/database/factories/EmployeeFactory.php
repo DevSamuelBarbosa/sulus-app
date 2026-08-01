@@ -20,7 +20,7 @@ class EmployeeFactory extends Factory
             'user_id' => User::factory()->role(UserRole::Employee),
             'company_id' => Company::factory(),
             'full_name' => fake()->name(),
-            'cpf' => fake()->unique()->numerify('###########'),
+            'document' => fake()->unique()->numerify('###########'),
             'phone' => fake()->numerify('(##) #####-####'),
             'benefit_status' => EmployeeStatus::Active,
             'hired_at' => fake()->dateTimeBetween('-3 years'),

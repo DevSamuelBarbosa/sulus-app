@@ -19,7 +19,10 @@ class StoreCompanyRequest extends FormRequest
         return [
             'legal_name' => ['required', 'string', 'max:255'],
             'trade_name' => ['nullable', 'string', 'max:255'],
-            'cnpj' => ['required', 'digits:14', 'unique:companies,cnpj'],
+            // Accepts Receita Federal's upcoming alphanumeric CNPJ (12
+            // letters/digits + 2 numeric check digits), not just the
+            // current all-numeric format.
+            'cnpj' => ['required', 'size:14', 'regex:/^[A-Z0-9]{12}\d{2}$/', 'unique:companies,cnpj'],
             'phone' => ['nullable', 'string', 'max:30'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'cep' => ['nullable', 'digits:8'],

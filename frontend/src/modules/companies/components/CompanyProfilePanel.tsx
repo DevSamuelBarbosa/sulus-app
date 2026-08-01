@@ -12,6 +12,9 @@ import type { AddressValue } from '@/modules/localization/types'
 import { useAuth } from '@/modules/auth/AuthContext'
 import { getErrorMessage } from '@/shared/lib/errors'
 import { MasterPasswordDialog } from '@/shared/components/MasterPasswordDialog'
+import { PhoneInput } from '@/shared/components/PhoneInput'
+import { CnpjInput } from '@/shared/components/CnpjInput'
+import { formatCnpj } from '@/shared/lib/masks'
 import { CompanySelfRegistrationLinkPanel } from '@/modules/companies/components/CompanySelfRegistrationLinkPanel'
 import {
   useCompanyProfile,
@@ -97,7 +100,7 @@ function CompanyProfileForm({ profile }: { profile: CompanyProfile }) {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label>CNPJ</Label>
-              <Input value={profile.cnpj} disabled readOnly />
+              <Input value={formatCnpj(profile.cnpj)} disabled readOnly />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Responsável (Master)</Label>
@@ -128,10 +131,10 @@ function CompanyProfileForm({ profile }: { profile: CompanyProfile }) {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="phone">Telefone</Label>
-              <Input
+              <PhoneInput
                 id="phone"
                 value={form.phone}
-                onChange={(e) => patch({ phone: e.target.value })}
+                onChange={(phone) => patch({ phone })}
                 placeholder="(00) 0000-0000"
               />
             </div>
@@ -193,12 +196,7 @@ function CompanySensitiveSettings({ profile }: { profile: CompanyProfile }) {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="settings_cnpj">CNPJ</Label>
-              <Input
-                id="settings_cnpj"
-                value={cnpj}
-                onChange={(e) => setCnpj(e.target.value.replace(/\D/g, ''))}
-                maxLength={14}
-              />
+              <CnpjInput id="settings_cnpj" value={cnpj} onChange={setCnpj} />
             </div>
             <div className="flex items-center gap-2 pt-6">
               <Switch id="settings_is_active" checked={isActive} onCheckedChange={setIsActive} />

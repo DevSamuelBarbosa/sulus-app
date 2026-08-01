@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, MapPin, Phone } from 'lucide-react'
 import { initials } from '@/lib/utils'
+import { formatPhone } from '@/shared/lib/masks'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -59,7 +60,7 @@ export function EstablishmentProfilePage() {
               {establishment.phone && (
                 <div className="flex items-center gap-2">
                   <Phone className="size-4 text-muted-foreground" />
-                  <span>{establishment.phone}</span>
+                  <span>{formatPhone(establishment.phone)}</span>
                 </div>
               )}
               {formatAddress(establishment) && (

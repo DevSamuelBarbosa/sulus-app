@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { RowActionsMenu } from '@/shared/components/RowActionsMenu'
 import { LocationFilter } from '@/modules/discovery/components/LocationFilter'
+import { formatCnpj } from '@/shared/lib/masks'
 import { initials } from '@/lib/utils'
 import { useAdminCompanies, useDeleteCompany, useUpdateCompany } from '@/modules/admin/hooks/useAdmin'
 import { CompanyFormDialog } from '@/modules/admin/components/CompanyFormDialog'
@@ -117,7 +118,7 @@ export function CompaniesPanel() {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{company.cnpj}</TableCell>
+                <TableCell>{formatCnpj(company.cnpj)}</TableCell>
                 <TableCell>{company.city ? `${company.city.name}/${company.city.uf}` : '—'}</TableCell>
                 <TableCell>
                   <Badge variant={company.is_active ? 'secondary' : 'outline'}>

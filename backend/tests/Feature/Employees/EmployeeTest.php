@@ -66,7 +66,7 @@ class EmployeeTest extends TestCase
         $this->postJson('/api/company/employees', [
             'email' => 'func@empresa.test',
             'full_name' => 'João da Silva',
-            'cpf' => '12345678901',
+            'document' => '12345678901',
             'phone' => '(54) 99999-0000',
         ])->assertCreated()
             ->assertJsonPath('data.full_name', 'João da Silva')
@@ -80,22 +80,22 @@ class EmployeeTest extends TestCase
             'role' => 'employee',
             'is_active' => false,
         ]);
-        $this->assertDatabaseHas('employees', ['cpf' => '12345678901', 'company_id' => $company->id]);
+        $this->assertDatabaseHas('employees', ['document' => '12345678901', 'company_id' => $company->id]);
         Mail::assertQueued(EmployeeInviteMail::class, fn (EmployeeInviteMail $mail) => $mail->hasTo('func@empresa.test'));
     }
 
-    public function test_creating_an_employee_requires_unique_cpf_and_email(): void
+    public function test_creating_an_employee_requires_unique_document_and_email(): void
     {
         Mail::fake();
         $company = Company::factory()->create();
-        $existing = Employee::factory()->for($company)->create(['cpf' => '99999999999']);
+        $existing = Employee::factory()->for($company)->create(['document' => '99999999999']);
         Sanctum::actingAs($company->masterUser);
 
         $this->postJson('/api/company/employees', [
             'email' => $existing->user->email,
             'full_name' => 'Duplicado',
-            'cpf' => '99999999999',
-        ])->assertUnprocessable()->assertJsonValidationErrors(['email', 'cpf']);
+            'document' => '99999999999',
+        ])->assertUnprocessable()->assertJsonValidationErrors(['email', 'document']);
     }
 
     public function test_company_cannot_access_another_companies_employee(): void

@@ -55,7 +55,7 @@ export interface Employee {
   company_id: number
   login_email: string
   full_name: string
-  cpf: string
+  document: string
   phone: string | null
   photo_url: string | null
   benefit_status: BenefitStatus
@@ -70,7 +70,7 @@ export interface Employee {
 export interface CreateEmployeePayload {
   email: string
   full_name: string
-  cpf: string
+  document: string
   phone?: string | null
   hired_at?: string | null
   city_id?: number | null
@@ -84,7 +84,7 @@ export interface PublicRegisterEmployeePayload {
   token: string
   email: string
   full_name: string
-  cpf: string
+  document: string
   phone?: string | null
   city_id?: number | null
   password: string
@@ -92,7 +92,7 @@ export interface PublicRegisterEmployeePayload {
 
 export interface UpdateEmployeePayload {
   full_name?: string
-  cpf?: string
+  document?: string
   phone?: string | null
   hired_at?: string | null
   city_id?: number | null

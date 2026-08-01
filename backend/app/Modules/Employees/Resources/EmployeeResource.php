@@ -21,7 +21,7 @@ class EmployeeResource extends JsonResource
             'company_id' => $this->company_id,
             'login_email' => $this->whenLoaded('user', fn () => $this->user->email),
             'full_name' => $this->full_name,
-            'cpf' => $this->cpf,
+            'document' => $this->document,
             'phone' => $this->phone,
             'photo_url' => $this->photoUrl(),
             'city_id' => $this->city_id,

@@ -52,7 +52,7 @@ class DemoSeeder extends Seeder
             [
                 'company_id' => $company->id,
                 'full_name' => 'Funcionário Demo',
-                'cpf' => '12345678901',
+                'document' => '12345678901',
                 'benefit_status' => EmployeeStatus::Active,
             ],
         );

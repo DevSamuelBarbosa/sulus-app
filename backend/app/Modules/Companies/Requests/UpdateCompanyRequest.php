@@ -22,7 +22,12 @@ class UpdateCompanyRequest extends FormRequest
         return [
             'legal_name' => ['sometimes', 'required', 'string', 'max:255'],
             'trade_name' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'cnpj' => ['sometimes', 'required', 'digits:14', Rule::unique('companies', 'cnpj')->ignore($company)],
+            // Accepts Receita Federal's upcoming alphanumeric CNPJ — see
+            // StoreCompanyRequest.
+            'cnpj' => [
+                'sometimes', 'required', 'size:14', 'regex:/^[A-Z0-9]{12}\d{2}$/',
+                Rule::unique('companies', 'cnpj')->ignore($company),
+            ],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
             'contact_email' => ['sometimes', 'nullable', 'email', 'max:255'],
             'cep' => ['sometimes', 'nullable', 'digits:8'],

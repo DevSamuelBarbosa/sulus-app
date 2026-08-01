@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { initials } from '@/lib/utils'
+import { formatDocument } from '@/shared/lib/masks'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -73,7 +74,7 @@ export function EmployeesPanel() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
           <Input
-            placeholder="Buscar por nome ou CPF…"
+            placeholder="Buscar por nome, CPF ou CNPJ…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full sm:w-64"
@@ -106,7 +107,7 @@ export function EmployeesPanel() {
           <TableHeader>
             <TableRow>
               <TableHead>Funcionário</TableHead>
-              <TableHead>CPF</TableHead>
+              <TableHead>CPF/CNPJ</TableHead>
               <TableHead>Cidade</TableHead>
               <TableHead>Benefício</TableHead>
               <TableHead className="text-right">Ações</TableHead>
@@ -146,7 +147,7 @@ export function EmployeesPanel() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{employee.cpf}</TableCell>
+                  <TableCell>{formatDocument(employee.document)}</TableCell>
                   <TableCell>{employee.city ? `${employee.city.name}/${employee.city.uf}` : '—'}</TableCell>
                   <TableCell>
                     {removed ? (

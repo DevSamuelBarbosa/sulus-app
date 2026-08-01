@@ -42,7 +42,7 @@ class EmployeeController extends Controller
             ->with(['user:id,email', 'city.state'])
             ->when($validated['search'] ?? null, fn ($q, $search) => $q->where(function ($q) use ($search) {
                 $q->where('full_name', 'like', "%{$search}%")
-                    ->orWhere('cpf', 'like', "%{$search}%");
+                    ->orWhere('document', 'like', "%{$search}%");
             }))
             ->when(
                 $status && $status !== 'removed',

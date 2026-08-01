@@ -21,7 +21,10 @@ class UpdateEmployeeRequest extends FormRequest
 
         return [
             'full_name' => ['sometimes', 'required', 'string', 'max:255'],
-            'cpf' => ['sometimes', 'required', 'digits:11', Rule::unique('employees', 'cpf')->ignore($employee)],
+            'document' => [
+                'sometimes', 'required', 'regex:/^(\d{11}|[A-Z0-9]{12}\d{2})$/',
+                Rule::unique('employees', 'document')->ignore($employee),
+            ],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
             'hired_at' => ['sometimes', 'nullable', 'date'],
             'city_id' => ['sometimes', 'nullable', 'integer', 'exists:cities,id'],

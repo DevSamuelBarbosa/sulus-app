@@ -21,7 +21,12 @@ class UpdateEstablishmentRequest extends FormRequest
 
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'cnpj' => ['sometimes', 'required', 'digits:14', Rule::unique('establishments', 'cnpj')->ignore($establishment)],
+            // Accepts Receita Federal's upcoming alphanumeric CNPJ — see
+            // Companies\Requests\StoreCompanyRequest.
+            'cnpj' => [
+                'sometimes', 'required', 'size:14', 'regex:/^[A-Z0-9]{12}\d{2}$/',
+                Rule::unique('establishments', 'cnpj')->ignore($establishment),
+            ],
             'category_id' => ['sometimes', 'nullable', 'integer', 'exists:categories,id'],
             'description' => ['sometimes', 'nullable', 'string'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:30'],

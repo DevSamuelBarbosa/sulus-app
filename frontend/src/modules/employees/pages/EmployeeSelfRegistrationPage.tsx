@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { StateSelect } from '@/shared/components/StateSelect'
 import { CityCombobox } from '@/shared/components/CityCombobox'
+import { DocumentInput } from '@/shared/components/DocumentInput'
+import { PhoneInput } from '@/shared/components/PhoneInput'
 
 type LinkState = 'checking' | 'valid' | 'invalid'
 
@@ -20,7 +22,7 @@ export function EmployeeSelfRegistrationPage() {
 
   const [linkState, setLinkState] = useState<LinkState>(() => (token ? 'checking' : 'invalid'))
   const [companyName, setCompanyName] = useState('')
-  const [form, setForm] = useState({ email: '', full_name: '', cpf: '', phone: '' })
+  const [form, setForm] = useState({ email: '', full_name: '', document: '', phone: '' })
   const [stateId, setStateId] = useState<number | null>(null)
   const [cityId, setCityId] = useState<number | null>(null)
   const [password, setPassword] = useState('')
@@ -58,7 +60,7 @@ export function EmployeeSelfRegistrationPage() {
         token,
         email: form.email,
         full_name: form.full_name,
-        cpf: form.cpf,
+        document: form.document,
         phone: form.phone || null,
         city_id: cityId,
         password,
@@ -122,22 +124,21 @@ export function EmployeeSelfRegistrationPage() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cpf">CPF</Label>
-            <Input
-              id="cpf"
-              value={form.cpf}
-              onChange={(e) => patch({ cpf: e.target.value.replace(/\D/g, '') })}
-              placeholder="Somente números"
-              maxLength={11}
+            <Label htmlFor="document">CPF/CNPJ</Label>
+            <DocumentInput
+              id="document"
+              value={form.document}
+              onChange={(document) => patch({ document })}
+              placeholder="CPF ou CNPJ"
               required
             />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="phone">Telefone</Label>
-            <Input
+            <PhoneInput
               id="phone"
               value={form.phone}
-              onChange={(e) => patch({ phone: e.target.value })}
+              onChange={(phone) => patch({ phone })}
               placeholder="(00) 00000-0000"
             />
           </div>

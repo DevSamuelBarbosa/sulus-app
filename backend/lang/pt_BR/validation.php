@@ -186,7 +186,7 @@ return [
         'cnpj' => 'CNPJ',
         'complemento' => 'complemento',
         'contact_email' => 'e-mail de contato',
-        'cpf' => 'CPF',
+        'document' => 'CPF/CNPJ',
         'description' => 'descrição',
         'email' => 'e-mail',
         'full_name' => 'nome completo',

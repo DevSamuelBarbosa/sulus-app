@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { FormSection } from '@/shared/components/FormSection'
+import { CnpjInput } from '@/shared/components/CnpjInput'
+import { PhoneInput } from '@/shared/components/PhoneInput'
 import { AddressForm } from '@/modules/localization/components/AddressForm'
 import { emptyAddress } from '@/modules/localization/types'
 import type { AddressValue } from '@/modules/localization/types'
@@ -237,12 +239,11 @@ function EstablishmentForm({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="e_cnpj">CNPJ</Label>
-              <Input
+              <CnpjInput
                 id="e_cnpj"
                 value={profile.cnpj}
-                onChange={(e) => patch({ cnpj: e.target.value.replace(/\D/g, '') })}
-                placeholder="Somente números"
-                maxLength={14}
+                onChange={(cnpj) => patch({ cnpj })}
+                placeholder="00.000.000/0000-00"
                 required
               />
             </div>
@@ -268,10 +269,10 @@ function EstablishmentForm({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="e_phone">Telefone</Label>
-            <Input
+            <PhoneInput
               id="e_phone"
               value={profile.phone}
-              onChange={(e) => patch({ phone: e.target.value })}
+              onChange={(phone) => patch({ phone })}
               placeholder="(00) 00000-0000"
             />
           </div>

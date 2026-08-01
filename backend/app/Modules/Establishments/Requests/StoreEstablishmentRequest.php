@@ -18,7 +18,9 @@ class StoreEstablishmentRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'cnpj' => ['required', 'digits:14', 'unique:establishments,cnpj'],
+            // Accepts Receita Federal's upcoming alphanumeric CNPJ — see
+            // Companies\Requests\StoreCompanyRequest.
+            'cnpj' => ['required', 'size:14', 'regex:/^[A-Z0-9]{12}\d{2}$/', 'unique:establishments,cnpj'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'description' => ['nullable', 'string'],
             'phone' => ['nullable', 'string', 'max:30'],

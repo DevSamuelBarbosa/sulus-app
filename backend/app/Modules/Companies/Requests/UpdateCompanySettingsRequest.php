@@ -24,7 +24,12 @@ class UpdateCompanySettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cnpj' => ['sometimes', 'required', 'digits:14', Rule::unique('companies', 'cnpj')->ignore($this->user()->company_id)],
+            // Accepts Receita Federal's upcoming alphanumeric CNPJ — see
+            // StoreCompanyRequest.
+            'cnpj' => [
+                'sometimes', 'required', 'size:14', 'regex:/^[A-Z0-9]{12}\d{2}$/',
+                Rule::unique('companies', 'cnpj')->ignore($this->user()->company_id),
+            ],
             'is_active' => ['sometimes', 'boolean'],
             'password' => ['required', 'string', 'current_password'],
         ];

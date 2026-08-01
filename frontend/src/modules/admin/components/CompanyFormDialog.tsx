@@ -15,6 +15,8 @@ import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { FormSection } from '@/shared/components/FormSection'
+import { CnpjInput } from '@/shared/components/CnpjInput'
+import { PhoneInput } from '@/shared/components/PhoneInput'
 import { getErrorMessage } from '@/shared/lib/errors'
 import { AddressForm } from '@/modules/localization/components/AddressForm'
 import { emptyAddress } from '@/modules/localization/types'
@@ -222,12 +224,11 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="cnpj">CNPJ</Label>
-              <Input
+              <CnpjInput
                 id="cnpj"
                 value={profile.cnpj}
-                onChange={(e) => patch({ cnpj: e.target.value.replace(/\D/g, '') })}
-                placeholder="Somente números"
-                maxLength={14}
+                onChange={(cnpj) => patch({ cnpj })}
+                placeholder="00.000.000/0000-00"
                 required
               />
             </div>
@@ -236,10 +237,10 @@ function CompanyForm({ company, onSaved }: { company?: AdminCompany | null; onSa
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="phone">Telefone</Label>
-              <Input
+              <PhoneInput
                 id="phone"
                 value={profile.phone}
-                onChange={(e) => patch({ phone: e.target.value })}
+                onChange={(phone) => patch({ phone })}
                 placeholder="(00) 0000-0000"
               />
             </div>

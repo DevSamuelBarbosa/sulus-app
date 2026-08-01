@@ -22,9 +22,11 @@ class StoreEmployeeRequest extends FormRequest
             // activation email (see EmployeeActivationService).
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
 
-            // Employee profile.
+            // Employee profile. document accepts a CPF (11 digits, pessoa
+            // física) or a CNPJ (14 alphanumeric chars, pessoa jurídica) —
+            // see Companies\Requests\StoreCompanyRequest for the CNPJ format.
             'full_name' => ['required', 'string', 'max:255'],
-            'cpf' => ['required', 'digits:11', 'unique:employees,cpf'],
+            'document' => ['required', 'regex:/^(\d{11}|[A-Z0-9]{12}\d{2})$/', 'unique:employees,document'],
             'phone' => ['nullable', 'string', 'max:30'],
             'hired_at' => ['nullable', 'date'],
             'city_id' => ['nullable', 'integer', 'exists:cities,id'],

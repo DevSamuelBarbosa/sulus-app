@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { StateSelect } from '@/shared/components/StateSelect'
 import { CityCombobox } from '@/shared/components/CityCombobox'
+import { DocumentInput } from '@/shared/components/DocumentInput'
+import { PhoneInput } from '@/shared/components/PhoneInput'
 import { getErrorMessage } from '@/shared/lib/errors'
 import {
   useCreateEmployee,
@@ -63,7 +65,7 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
   const [form, setForm] = useState({
     email: employee?.login_email ?? '',
     full_name: employee?.full_name ?? '',
-    cpf: employee?.cpf ?? '',
+    document: employee?.document ?? '',
     phone: employee?.phone ?? '',
     hired_at: employee?.hired_at ?? '',
   })
@@ -93,7 +95,7 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
           id: employee.id,
           payload: {
             full_name: form.full_name,
-            cpf: form.cpf,
+            document: form.document,
             phone: form.phone || null,
             hired_at: form.hired_at || null,
             city_id: cityId,
@@ -103,7 +105,7 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
         await createEmployee.mutateAsync({
           email: form.email,
           full_name: form.full_name,
-          cpf: form.cpf,
+          document: form.document,
           phone: form.phone || null,
           hired_at: form.hired_at || null,
           city_id: cityId,
@@ -188,22 +190,21 @@ function EmployeeForm({ employee, onSaved }: { employee?: Employee | null; onSav
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cpf">CPF</Label>
-            <Input
-              id="cpf"
-              value={form.cpf}
-              onChange={(e) => patch({ cpf: e.target.value.replace(/\D/g, '') })}
-              placeholder="Somente números"
-              maxLength={11}
+            <Label htmlFor="document">CPF/CNPJ</Label>
+            <DocumentInput
+              id="document"
+              value={form.document}
+              onChange={(document) => patch({ document })}
+              placeholder="CPF ou CNPJ"
               required
             />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="phone">Telefone</Label>
-            <Input
+            <PhoneInput
               id="phone"
               value={form.phone}
-              onChange={(e) => patch({ phone: e.target.value })}
+              onChange={(phone) => patch({ phone })}
               placeholder="(00) 00000-0000"
             />
           </div>

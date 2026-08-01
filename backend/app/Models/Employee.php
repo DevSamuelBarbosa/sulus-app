@@ -19,7 +19,7 @@ class Employee extends Model
         'company_id',
         'city_id',
         'full_name',
-        'cpf',
+        'document',
         'photo_path',
         'phone',
         'benefit_status',

@@ -19,6 +19,7 @@ import {
 import { RowActionsMenu } from '@/shared/components/RowActionsMenu'
 import { LocationFilter } from '@/modules/discovery/components/LocationFilter'
 import { initials } from '@/lib/utils'
+import { formatCnpj } from '@/shared/lib/masks'
 import {
   useAdminEstablishments,
   useDeleteEstablishment,
@@ -124,7 +125,7 @@ export function EstablishmentsPanel() {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{establishment.cnpj}</TableCell>
+                <TableCell>{formatCnpj(establishment.cnpj)}</TableCell>
                 <TableCell>{establishment.category?.name ?? '—'}</TableCell>
                 <TableCell>
                   {establishment.city ? `${establishment.city.name}/${establishment.city.uf}` : '—'}

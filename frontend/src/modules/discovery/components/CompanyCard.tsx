@@ -1,4 +1,5 @@
 import { initials } from '@/lib/utils'
+import { formatPhone } from '@/shared/lib/masks'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 import type { CompanySummary } from '@/modules/discovery/types'
@@ -25,7 +26,9 @@ export function CompanyCard({ company }: CompanyCardProps) {
           {company.trade_name && (
             <p className="truncate text-xs text-muted-foreground">{company.legal_name}</p>
           )}
-          {company.phone && <p className="text-sm text-muted-foreground">{company.phone}</p>}
+          {company.phone && (
+            <p className="text-sm text-muted-foreground">{formatPhone(company.phone)}</p>
+          )}
           {company.city && (
             <p className="text-xs text-muted-foreground">
               {company.city.name} — {company.city.uf}

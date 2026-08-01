@@ -24,8 +24,10 @@ class UpdateEstablishmentSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Accepts Receita Federal's upcoming alphanumeric CNPJ — see
+            // Companies\Requests\StoreCompanyRequest.
             'cnpj' => [
-                'sometimes', 'required', 'digits:14',
+                'sometimes', 'required', 'size:14', 'regex:/^[A-Z0-9]{12}\d{2}$/',
                 Rule::unique('establishments', 'cnpj')->ignore($this->user()->establishment_id),
             ],
             'is_active' => ['sometimes', 'boolean'],
