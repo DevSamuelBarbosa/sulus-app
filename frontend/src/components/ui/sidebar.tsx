@@ -344,7 +344,10 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-footer"
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-2", className)}
+      // Extra bottom padding for the home-indicator safe area on iPhone —
+      // without it the logout button sits right at the swipe-gesture edge.
+      // Needs viewport-fit=cover in index.html or env() resolves to 0.
+      className={cn("flex flex-col gap-2 p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]", className)}
       {...props}
     />
   )
