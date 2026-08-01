@@ -7,6 +7,10 @@ import { DashboardLayout } from '@/app/layouts/DashboardLayout'
 import { LoginPage } from '@/modules/auth/pages/LoginPage'
 import { AccountInactivePage } from '@/modules/auth/pages/AccountInactivePage'
 import { ActivateAccountPage } from '@/modules/auth/pages/ActivateAccountPage'
+import { ForgotPasswordPage } from '@/modules/auth/pages/ForgotPasswordPage'
+import { ResetPasswordPage } from '@/modules/auth/pages/ResetPasswordPage'
+import { PrivacyPolicyPage } from '@/modules/auth/pages/PrivacyPolicyPage'
+import { ContactPage } from '@/modules/contact/pages/ContactPage'
 import { EmployeeSelfRegistrationPage } from '@/modules/employees/pages/EmployeeSelfRegistrationPage'
 import { AdminDashboard } from '@/modules/admin/pages/AdminDashboard'
 import { AdminCompaniesPage } from '@/modules/admin/pages/AdminCompaniesPage'
@@ -48,6 +52,10 @@ export function AppRouter() {
         <Route path="/ativar-conta" element={<ActivateAccountPage />} />
         <Route path="/cadastro-funcionario" element={<EmployeeSelfRegistrationPage />} />
         <Route path="/conta-desativada" element={<AccountInactivePage />} />
+        <Route path="/recuperar-senha" element={<ForgotPasswordPage />} />
+        <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
+        <Route path="/cadastre-se" element={<ContactPage />} />
+        <Route path="/politica-de-privacidade" element={<PrivacyPolicyPage />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>

@@ -18,3 +18,7 @@ export interface LoginResponse {
   token: string
   user: AuthUser
 }
+
+export interface MessageResponse {
+  message: string
+}

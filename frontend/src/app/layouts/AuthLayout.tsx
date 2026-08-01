@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet } from 'react-router-dom'
 import { LogoWordmark } from '@/shared/components/Logo'
 
 /**
@@ -22,6 +22,12 @@ export function AuthLayout() {
             <LogoWordmark onDark />
           </div>
           <Outlet />
+          <Link
+            to="/politica-de-privacidade"
+            className="text-center text-xs text-tertiary-foreground/60 hover:underline"
+          >
+            Política de Privacidade
+          </Link>
         </div>
       </div>
 

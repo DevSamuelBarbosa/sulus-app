@@ -28,3 +28,4 @@ require __DIR__.'/api/qrcode.php';
 require __DIR__.'/api/benefits.php';
 require __DIR__.'/api/discovery.php';
 require __DIR__.'/api/reports.php';
+require __DIR__.'/api/contact.php';

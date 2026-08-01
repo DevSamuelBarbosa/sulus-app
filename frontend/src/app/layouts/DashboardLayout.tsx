@@ -5,6 +5,7 @@ import { AppSidebar } from '@/app/layouts/AppSidebar'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { ImpersonationBanner } from '@/shared/components/ImpersonationBanner'
+import { AlphaVersionBanner } from '@/shared/components/AlphaVersionBanner'
 
 function usePageTitle(): string {
   const { user } = useAuth()
@@ -27,6 +28,7 @@ export function DashboardLayout() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
+        <AlphaVersionBanner />
         <ImpersonationBanner />
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />

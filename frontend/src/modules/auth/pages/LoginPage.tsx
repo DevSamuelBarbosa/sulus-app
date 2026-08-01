@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { isAxiosError } from 'axios'
 import { toast } from 'sonner'
 import { useAuth } from '@/modules/auth/AuthContext'
@@ -65,6 +65,14 @@ export function LoginPage() {
         <Button type="submit" disabled={submitting} className="w-full cursor-pointer">
           {submitting ? 'Entrando…' : 'Entrar'}
         </Button>
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <Link to="/recuperar-senha" className="hover:underline">
+            Esqueci minha senha
+          </Link>
+          <Link to="/cadastre-se" className="hover:underline">
+            Cadastre-se
+          </Link>
+        </div>
       </form>
     </div>
   )

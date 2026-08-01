@@ -115,4 +115,17 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Sales/Contact Address
+    |--------------------------------------------------------------------------
+    |
+    | Destination for leads submitted through the public "Cadastre-se"
+    | contact form (see Modules\Contact) — companies/establishments
+    | interested in the platform, added manually by the team afterwards.
+    |
+    */
+
+    'sales_address' => env('MAIL_SALES_ADDRESS', 'contato@sulusbeneficios.com.br'),
+
 ];
