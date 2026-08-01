@@ -6,7 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  font: 15px/1.5 system-ui, 'Segoe UI', Roboto, sans-serif;
+  font: 16px/1.5 system-ui, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 
   --background: oklch(1 0 0);
