@@ -37,6 +37,26 @@ export function useUpdateCompanySettings() {
   })
 }
 
+export function useGenerateSelfRegistrationLink() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => companyApi.selfRegistrationLink.generate(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['company', 'profile'] })
+    },
+  })
+}
+
+export function useRevokeSelfRegistrationLink() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => companyApi.selfRegistrationLink.revoke(),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['company', 'profile'] })
+    },
+  })
+}
+
 export function useDeleteCompanyAccount() {
   return useMutation({
     mutationFn: (password: string) => companyApi.profile.deleteAccount(password),

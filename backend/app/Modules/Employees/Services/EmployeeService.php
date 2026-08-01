@@ -51,6 +51,36 @@ class EmployeeService
     }
 
     /**
+     * Employee self-registration via a company's shareable link (see
+     * SelfRegistrationService). Unlike create(), the login is active
+     * immediately and the employee sets their own password up front, so no
+     * activation email is sent and activation_token is never touched.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function registerViaSelfRegistration(Company $company, array $data): Employee
+    {
+        return DB::transaction(function () use ($company, $data) {
+            $user = User::create([
+                'name' => $data['full_name'],
+                'email' => $data['email'],
+                'password' => $data['password'],
+                'role' => UserRole::Employee,
+                'is_active' => true,
+            ]);
+
+            return $company->employees()->create([
+                'user_id' => $user->id,
+                'full_name' => $data['full_name'],
+                'cpf' => $data['cpf'],
+                'phone' => $data['phone'] ?? null,
+                'city_id' => $data['city_id'] ?? null,
+                'benefit_status' => EmployeeStatus::Active,
+            ]);
+        });
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      */
     public function update(Employee $employee, array $data): Employee

@@ -1,6 +1,8 @@
 <?php
 
 use App\Modules\Companies\Controllers\ProfileController;
+use App\Modules\Companies\Controllers\SelfRegistrationController;
+use App\Modules\Companies\Controllers\SelfRegistrationLinkController;
 use App\Modules\Companies\Controllers\TenantUserController;
 use App\Modules\Employees\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +24,13 @@ Route::prefix('company')->middleware(['auth:sanctum', 'role:company'])->group(fu
     Route::patch('users/{user}/promote-master', [TenantUserController::class, 'promoteMaster'])
         ->middleware('tenant.permission:master');
 
+    // Employee self-registration link — Master and Administrador only (see
+    // SelfRegistrationLinkService).
+    Route::middleware('tenant.permission:master,administrador')->group(function () {
+        Route::post('self-registration-link', [SelfRegistrationLinkController::class, 'store']);
+        Route::delete('self-registration-link', [SelfRegistrationLinkController::class, 'destroy']);
+    });
+
     // Sensitive settings (CNPJ, active status) and account deletion — Master
     // only, password confirmed on every call (see UpdateCompanySettingsRequest).
     Route::middleware('tenant.permission:master')->group(function () {
@@ -40,4 +49,13 @@ Route::prefix('company')->middleware(['auth:sanctum', 'role:company'])->group(fu
     Route::patch('employees/{employee}/cancel-benefit', [EmployeeController::class, 'cancelBenefit']);
     Route::patch('employees/{employee}/reactivate-benefit', [EmployeeController::class, 'reactivateBenefit']);
     Route::patch('employees/{employee}/restore', [EmployeeController::class, 'restore']);
+});
+
+// Public — reached from a company's self-registration link, before the
+// employee has any account. See SelfRegistrationController.
+Route::prefix('company')->group(function () {
+    Route::get('self-registration/{token}', [SelfRegistrationController::class, 'show'])
+        ->middleware('throttle:20,1');
+    Route::post('self-registration', [SelfRegistrationController::class, 'register'])
+        ->middleware('throttle:10,1');
 });

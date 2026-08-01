@@ -3,7 +3,9 @@ import type { ReactNode } from 'react'
 import { tokenStorage } from '@/shared/api/httpClient'
 import { authApi } from '@/modules/auth/api/auth.api'
 import { employeeApi } from '@/modules/employees/api/employee.api'
+import { companyApi } from '@/modules/companies/api/company.api'
 import type { AuthUser, LoginPayload } from '@/modules/auth/types'
+import type { PublicRegisterEmployeePayload } from '@/modules/companies/types'
 
 interface AuthContextValue {
   user: AuthUser | null
@@ -15,6 +17,7 @@ interface AuthContextValue {
   stopImpersonation: () => Promise<AuthUser>
   refreshUser: () => Promise<AuthUser>
   activateAccount: (token: string, password: string) => Promise<AuthUser>
+  registerEmployee: (payload: PublicRegisterEmployeePayload) => Promise<AuthUser>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -84,6 +87,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return activatedUser
   }, [])
 
+  const registerEmployee = useCallback(async (payload: PublicRegisterEmployeePayload) => {
+    const { token: authToken, user: registeredUser } = await companyApi.publicRegistration.register(payload)
+    tokenStorage.set(authToken)
+    setUser(registeredUser)
+    return registeredUser
+  }, [])
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -95,8 +105,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       stopImpersonation,
       refreshUser,
       activateAccount,
+      registerEmployee,
     }),
-    [user, isLoading, login, logout, impersonate, stopImpersonation, refreshUser, activateAccount],
+    [
+      user,
+      isLoading,
+      login,
+      logout,
+      impersonate,
+      stopImpersonation,
+      refreshUser,
+      activateAccount,
+      registerEmployee,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

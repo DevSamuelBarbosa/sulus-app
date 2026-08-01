@@ -42,6 +42,8 @@ class CompanyResource extends JsonResource
                 'state_id' => $this->city->state_id,
             ]),
             'is_active' => $this->is_active,
+            'self_registration_link' => $this->selfRegistrationLink(),
+            'self_registration_token_expires_at' => $this->self_registration_token_expires_at,
             'created_at' => $this->created_at,
         ];
     }

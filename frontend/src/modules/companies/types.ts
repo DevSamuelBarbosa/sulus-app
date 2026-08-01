@@ -23,6 +23,8 @@ export interface CompanyProfile {
   city_id: number | null
   city: CompanyCity | null
   is_active: boolean
+  self_registration_link: string | null
+  self_registration_token_expires_at: string | null
   created_at: string
 }
 
@@ -72,6 +74,20 @@ export interface CreateEmployeePayload {
   phone?: string | null
   hired_at?: string | null
   city_id?: number | null
+}
+
+export interface SelfRegistrationInfo {
+  trade_name: string
+}
+
+export interface PublicRegisterEmployeePayload {
+  token: string
+  email: string
+  full_name: string
+  cpf: string
+  phone?: string | null
+  city_id?: number | null
+  password: string
 }
 
 export interface UpdateEmployeePayload {

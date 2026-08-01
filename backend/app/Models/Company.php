@@ -31,6 +31,8 @@ class Company extends Model
         'longitude',
         'logo_path',
         'is_active',
+        'self_registration_token',
+        'self_registration_token_expires_at',
     ];
 
     protected function casts(): array
@@ -39,6 +41,7 @@ class Company extends Model
             'is_active' => 'boolean',
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
+            'self_registration_token_expires_at' => 'datetime',
         ];
     }
 
@@ -87,5 +90,23 @@ class Company extends Model
         }
 
         return $storage->url($this->logo_path);
+    }
+
+    /**
+     * Shareable self-registration link for employees, or null when there's
+     * no active one. The token itself is stored in plain text (unlike
+     * User::activation_token, which is hashed) because it needs to stay
+     * visible/copyable by the company at any time — see
+     * SelfRegistrationLinkService.
+     */
+    public function selfRegistrationLink(): ?string
+    {
+        if (! $this->self_registration_token
+            || ! $this->self_registration_token_expires_at
+            || $this->self_registration_token_expires_at->isPast()) {
+            return null;
+        }
+
+        return rtrim(config('app.frontend_url'), '/').'/cadastro-funcionario?token='.$this->self_registration_token;
     }
 }

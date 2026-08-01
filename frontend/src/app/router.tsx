@@ -7,6 +7,7 @@ import { DashboardLayout } from '@/app/layouts/DashboardLayout'
 import { LoginPage } from '@/modules/auth/pages/LoginPage'
 import { AccountInactivePage } from '@/modules/auth/pages/AccountInactivePage'
 import { ActivateAccountPage } from '@/modules/auth/pages/ActivateAccountPage'
+import { EmployeeSelfRegistrationPage } from '@/modules/employees/pages/EmployeeSelfRegistrationPage'
 import { AdminDashboard } from '@/modules/admin/pages/AdminDashboard'
 import { AdminCompaniesPage } from '@/modules/admin/pages/AdminCompaniesPage'
 import { AdminEstablishmentsPage } from '@/modules/admin/pages/AdminEstablishmentsPage'
@@ -45,6 +46,7 @@ export function AppRouter() {
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/ativar-conta" element={<ActivateAccountPage />} />
+        <Route path="/cadastro-funcionario" element={<EmployeeSelfRegistrationPage />} />
         <Route path="/conta-desativada" element={<AccountInactivePage />} />
       </Route>
 

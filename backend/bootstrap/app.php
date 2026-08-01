@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\EnsureTenantPermission;
 use App\Modules\Auth\Exceptions\AccountInactiveException;
+use App\Modules\Companies\Exceptions\SelfRegistrationTokenInvalidException;
 use App\Modules\Employees\Exceptions\ActivationTokenInvalidException;
 use App\Modules\QrCode\Exceptions\BenefitInactiveException;
 use App\Modules\QrCode\Exceptions\QrTokenInvalidException;
@@ -35,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->dontReport(BenefitInactiveException::class);
         $exceptions->dontReport(QrTokenInvalidException::class);
         $exceptions->dontReport(ActivationTokenInvalidException::class);
+        $exceptions->dontReport(SelfRegistrationTokenInvalidException::class);
 
         $exceptions->render(fn (AccountInactiveException $e) => new JsonResponse([
             'message' => $e->getMessage(),
@@ -54,5 +56,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(fn (ActivationTokenInvalidException $e) => new JsonResponse([
             'message' => $e->getMessage(),
             'code' => 'activation_token_invalid',
+        ], 410));
+
+        $exceptions->render(fn (SelfRegistrationTokenInvalidException $e) => new JsonResponse([
+            'message' => $e->getMessage(),
+            'code' => 'self_registration_token_invalid',
         ], 410));
     })->create();

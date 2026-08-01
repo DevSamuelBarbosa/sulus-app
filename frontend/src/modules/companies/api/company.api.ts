@@ -1,12 +1,15 @@
 import { httpClient } from '@/shared/api/httpClient'
 import type { BenefitUsage, Paginated } from '@/shared/types'
 import type { CreateTenantUserPayload, TenantUser, UpdateTenantUserPayload } from '@/shared/types/tenant'
+import type { LoginResponse } from '@/modules/auth/types'
 import type {
   CompanyProfile,
   CompanyReport,
   CreateEmployeePayload,
   Employee,
   EmployeeFilters,
+  PublicRegisterEmployeePayload,
+  SelfRegistrationInfo,
   UpdateCompanyProfilePayload,
   UpdateCompanySettingsPayload,
   UpdateEmployeePayload,
@@ -29,6 +32,28 @@ export const companyApi = {
     },
     async deleteAccount(password: string): Promise<void> {
       await httpClient.delete('/company', { data: { password } })
+    },
+  },
+
+  selfRegistrationLink: {
+    async generate(): Promise<CompanyProfile> {
+      const { data } = await httpClient.post<{ data: CompanyProfile }>('/company/self-registration-link')
+      return data.data
+    },
+    async revoke(): Promise<CompanyProfile> {
+      const { data } = await httpClient.delete<{ data: CompanyProfile }>('/company/self-registration-link')
+      return data.data
+    },
+  },
+
+  publicRegistration: {
+    async show(token: string): Promise<SelfRegistrationInfo> {
+      const { data } = await httpClient.get<SelfRegistrationInfo>(`/company/self-registration/${token}`)
+      return data
+    },
+    async register(payload: PublicRegisterEmployeePayload): Promise<LoginResponse> {
+      const { data } = await httpClient.post<LoginResponse>('/company/self-registration', payload)
+      return data
     },
   },
 

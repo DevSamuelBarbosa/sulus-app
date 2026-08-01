@@ -12,6 +12,7 @@ import type { AddressValue } from '@/modules/localization/types'
 import { useAuth } from '@/modules/auth/AuthContext'
 import { getErrorMessage } from '@/shared/lib/errors'
 import { MasterPasswordDialog } from '@/shared/components/MasterPasswordDialog'
+import { CompanySelfRegistrationLinkPanel } from '@/modules/companies/components/CompanySelfRegistrationLinkPanel'
 import {
   useCompanyProfile,
   useDeleteCompanyAccount,
@@ -43,6 +44,9 @@ export function CompanyProfilePanel() {
   return (
     <div className="flex flex-col gap-6">
       <CompanyProfileForm key={profile.id} profile={profile} />
+      {(user?.tenant_role === 'master' || user?.tenant_role === 'administrador') && (
+        <CompanySelfRegistrationLinkPanel profile={profile} />
+      )}
       {user?.tenant_role === 'master' && <CompanySensitiveSettings profile={profile} />}
     </div>
   )
